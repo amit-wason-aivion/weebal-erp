@@ -34,6 +34,7 @@ init_db()
 
 from tally_push import sync_voucher_to_tally
 from auth import get_current_user, create_access_token, verify_password, get_password_hash
+from seeders import seed_default_accounts
 
 app = FastAPI(title="WEEBAL ERP API")
 
@@ -99,6 +100,10 @@ class CompanyCreateSchema(BaseModel):
     email: Optional[str] = None
     financial_year_from: date
     books_beginning_from: date
+
+class GroupCreateSchema(BaseModel):
+    name: str
+    parent_id: Optional[int] = None
 
 class CompanySplitSchema(BaseModel):
     new_financial_year_start: date
@@ -171,15 +176,21 @@ def get_companies(db: Session = Depends(get_db), current_user: User = Depends(ge
 def create_company(company_data: CompanyCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     if current_user.role != "superadmin":
         raise HTTPException(status_code=403, detail="Only Superadmins can create companies")
-    new_company = Company(**company_data.dict())
-    db.add(new_company)
+    
     try:
+        new_company = Company(**company_data.dict())
+        db.add(new_company)
+        db.flush() # Get ID for seeding
+        
+        # Seed standard Tally Chart of Accounts
+        seed_default_accounts(db, new_company.id)
+        
         db.commit()
         db.refresh(new_company)
-        return {"message": "Company created successfully", "id": new_company.id}
+        return {"message": "Company created successfully with default Chart of Accounts", "id": new_company.id}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Failed to create company: {str(e)}")
 
 @app.post("/api/companies/{company_id}/split")
 def split_company(company_id: int, split_data: CompanySplitSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -367,7 +378,28 @@ def get_groups(db: Session = Depends(get_db), current_user: User = Depends(get_c
     """Returns all Tally Groups."""
     from models import TallyGroup
     groups = db.query(TallyGroup).filter(TallyGroup.company_id == current_user.company_id).all()
-    return [{"id": g.id, "name": g.name} for g in groups]
+    # Include parent_id for local hierarchy mapping in frontend
+    return [{"id": g.id, "name": g.name, "parent_id": g.parent_id} for g in groups]
+
+@app.post("/api/groups")
+def create_group(group: GroupCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Creates a new Tally Group."""
+    if not current_user.can_manage_masters:
+        raise HTTPException(status_code=403, detail="Permission denied to manage masters")
+    
+    db_group = db.query(TallyGroup).filter(TallyGroup.name == group.name, TallyGroup.company_id == current_user.company_id).first()
+    if db_group:
+        raise HTTPException(status_code=400, detail="Group already exists in this company")
+    
+    new_group = TallyGroup(
+        name=group.name,
+        company_id=current_user.company_id,
+        parent_id=group.parent_id
+    )
+    db.add(new_group)
+    db.commit()
+    db.refresh(new_group)
+    return new_group
 
 @app.post("/api/sync/import-ledgers")
 def import_ledgers(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

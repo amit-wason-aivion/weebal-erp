@@ -76,6 +76,18 @@ const Gateway = () => {
         e.preventDefault();
         navigate('/company-info');
       }
+
+      // F11: Features Placeholder
+      if (e.key === 'F11') {
+        e.preventDefault();
+        message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0');
+      }
+
+      // F12: Configure Placeholder
+      if (e.key === 'F12') {
+        e.preventDefault();
+        message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0');
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -115,7 +127,7 @@ const Gateway = () => {
     return (
       <div 
         onClick={onClick}
-        style={{ padding: '4px 20px', cursor: 'pointer', textAlign: 'center', fontSize: '14px' }}
+        style={{ padding: '4px 20px 4px 80px', cursor: 'pointer', textAlign: 'left', fontSize: '14px' }}
         className="tally-menu-item"
         onMouseEnter={(e) => { e.target.style.backgroundColor = '#000080'; e.target.style.color = '#fff'; }}
         onMouseLeave={(e) => { e.target.style.backgroundColor = 'transparent'; e.target.style.color = theme.text; }}
@@ -128,7 +140,7 @@ const Gateway = () => {
   };
 
   const MenuSectionHeading = ({ title }) => (
-    <div style={{ textAlign: 'center', color: '#000080', fontWeight: 'bold', fontStyle: 'italic', margin: '10px 0 5px 0', fontSize: '13px' }}>
+    <div style={{ textAlign: 'left', paddingLeft: '60px', color: '#000080', fontWeight: 'bold', margin: '10px 0 5px 0', fontSize: '13px' }}>
       {title}
     </div>
   );
@@ -158,7 +170,7 @@ const Gateway = () => {
 
       {/* Gateway Green Info Bar */}
       <div style={{ backgroundColor: theme.headerBg, color: theme.headerText, display: 'flex', justifyContent: 'space-between', padding: '2px 10px', fontSize: '12px', fontWeight: 'bold' }}>
-        <span>Gateway of Tally</span>
+        <span>Gateway of WEEBAL</span>
         <span>Ctrl + M ✖</span>
       </div>
 
@@ -217,7 +229,7 @@ const Gateway = () => {
         {/* Right Pane - Gateway Menu */}
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', paddingTop: '60px', backgroundColor: theme.bg }}>
           
-          <div style={{ width: '300px', backgroundColor: theme.bg, border: `1px solid ${theme.border}`, borderStyle: 'outset', boxShadow: '2px 2px 5px rgba(0,0,0,0.2)', height: 'fit-content' }}>
+          <div style={{ width: '350px', backgroundColor: theme.bg, border: `1px solid ${theme.border}`, borderStyle: 'outset', boxShadow: '2px 2px 5px rgba(0,0,0,0.2)', height: 'fit-content' }}>
             
             <div style={{ backgroundColor: theme.headerBg, color: theme.headerText, textAlign: 'center', padding: '4px', fontWeight: 'bold', fontSize: '14px', borderBottom: `1px solid ${theme.border}` }}>
               Gateway of WEEBAL
@@ -237,7 +249,7 @@ const Gateway = () => {
                 </>
               )}
               
-              <MenuSectionHeading title="Utilities" />
+              <MenuSectionHeading title="Import" />
               {isAdmin && <MenuItem label="Import of Data" hotkeyChar="O" onClick={() => navigate('/import-data')} />}
               {(isAdmin || isSuper) && <MenuItem label="User Management" hotkeyChar="U" onClick={() => navigate('/users')} />}
               <MenuItem label="Banking" hotkeyChar="N" onClick={() => message.info('Banking module coming in Version 2.0')} />
@@ -254,14 +266,17 @@ const Gateway = () => {
               
               <MenuSectionHeading title="Display" />
               {canViewReports && <MenuItem label="Day Book" hotkeyChar="D" onClick={() => navigate('/daybook')} />}
-              <MenuItem label="Logout" hotkeyChar="L" onClick={() => {
-                localStorage.clear();
-                navigate('/login');
-              }} />
-              <MenuItem label="Quit" hotkeyChar="Q" onClick={() => {
-                localStorage.clear();
-                navigate('/login');
-              }} />
+              
+              <div style={{ marginTop: '10px' }}>
+                <MenuItem label="Logout" hotkeyChar="L" onClick={() => {
+                  localStorage.clear();
+                  navigate('/login');
+                }} />
+                <MenuItem label="Quit" hotkeyChar="Q" onClick={() => {
+                  localStorage.clear();
+                  navigate('/login');
+                }} />
+              </div>
             </div>
 
           </div>
@@ -271,10 +286,16 @@ const Gateway = () => {
         {/* Rightmost Action Buttons Pane */}
         <div style={{ width: '100px', backgroundColor: '#e0e0e0', borderLeft: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', height: '100%' }}>
            <div style={{ flex: 1 }}></div>
-           <div style={{ borderTop: `1px solid ${theme.border}`, borderBottom: `1px solid ${theme.border}`, padding: '4px', fontSize: '12px', textAlign: 'center', cursor: 'pointer' }}>
+           <div 
+             onClick={() => message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0')}
+             style={{ borderTop: `1px solid ${theme.border}`, borderBottom: `1px solid ${theme.border}`, padding: '4px', fontSize: '12px', textAlign: 'center', cursor: 'pointer' }}
+           >
              <Text style={{ color: theme.hotkey, fontWeight: 'bold' }}>F11:</Text> Features
            </div>
-           <div style={{ borderBottom: `1px solid ${theme.border}`, padding: '4px', fontSize: '12px', textAlign: 'center', cursor: 'pointer' }}>
+           <div 
+             onClick={() => message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0')}
+             style={{ borderBottom: `1px solid ${theme.border}`, padding: '4px', fontSize: '12px', textAlign: 'center', cursor: 'pointer' }}
+           >
              <Text style={{ color: theme.hotkey, fontWeight: 'bold' }}>F12:</Text> Configure
            </div>
         </div>

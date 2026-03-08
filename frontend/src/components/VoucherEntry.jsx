@@ -7,6 +7,15 @@ import dayjs from 'dayjs';
 const { Title, Text } = Typography;
 const { Option } = Select;
 
+const VOUCHER_TYPE_NAMES = {
+  '1': 'Journal',
+  '2': 'Sales',
+  '3': 'Purchase',
+  '4': 'Contra',
+  '5': 'Payment',
+  '6': 'Receipt'
+};
+
 const VoucherEntry = () => {
   const [form] = Form.useForm();
   const [ledgers, setLedgers] = useState([]);
@@ -14,31 +23,43 @@ const VoucherEntry = () => {
     { key: 0, ledger_id: null, is_debit: true, amount: null },
     { key: 1, ledger_id: null, is_debit: false, amount: null }
   ]);
-  const [voucherType, setVoucherType] = useState('1'); // Default to 1 (Assuming 1 is Journal or similar)
+  const [voucherType, setVoucherType] = useState('1'); 
   const navigate = useNavigate();
   const { id } = useParams();
   
+  // Refs for focusing
+  const inputRefs = useRef({});
+
   // Tally hotkey listeners
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
+      // Don't trigger hotkeys if typing in an input (except Alt+A for save)
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+        if (e.ctrlKey && e.key.toLowerCase() === 'a') {
+            e.preventDefault();
+            form.submit();
+        }
+        return;
+      }
+
       if (e.key === 'F4') setVoucherType('4'); // Contra
       if (e.key === 'F5') setVoucherType('5'); // Payment
       if (e.key === 'F6') setVoucherType('6'); // Receipt
       if (e.key === 'F7') setVoucherType('1'); // Journal
       if (e.key === 'F8') setVoucherType('2'); // Sales
       if (e.key === 'F9') setVoucherType('3'); // Purchase
+      if (e.key === 'Escape') navigate('/');
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, []);
+  }, [form, navigate]);
 
   useEffect(() => {
-    // Fetch ledgers for combobox
+    // Fetch ledgers
     axios.get('http://localhost:8000/api/ledgers')
       .then(res => setLedgers(res.data))
       .catch(err => message.error("Failed to load ledgers"));
 
-    // If ID exists, fetch existing voucher details
     if (id) {
       axios.get(`http://localhost:8000/api/vouchers/${id}`)
         .then(res => {
@@ -58,26 +79,44 @@ const VoucherEntry = () => {
     }
   }, [id, form]);
 
+  const totalDr = entries.filter(e => e.is_debit).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  const totalCr = entries.filter(e => !e.is_debit).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  const isValid = totalDr > 0 && totalDr === totalCr;
+
   const handleEntryChange = (key, field, value) => {
     const newEntries = [...entries];
     const index = newEntries.findIndex(e => e.key === key);
     newEntries[index][field] = value;
-    
-    // Automatically add a new row if we're filling the last one
-    if (index === newEntries.length - 1 && field === 'amount' && value > 0) {
-      newEntries.push({ key: newEntries.length, ledger_id: null, is_debit: !newEntries[index].is_debit, amount: null });
-    }
     setEntries(newEntries);
   };
 
-  const removeEntry = (key) => {
-    if (entries.length <= 2) return; // Keep at least 2
-    setEntries(entries.filter(e => e.key !== key));
+  const addRowAndBalance = (currentIndex) => {
+    const diff = Math.abs(totalDr - totalCr);
+    const nextIsDebit = totalDr < totalCr;
+    
+    // Create new row
+    const newKey = Math.max(...entries.map(e => e.key)) + 1;
+    const newEntries = [...entries];
+    newEntries.push({ 
+        key: newKey, 
+        ledger_id: null, 
+        is_debit: nextIsDebit, 
+        amount: diff > 0 ? diff : null 
+    });
+    setEntries(newEntries);
+
+    // Focus next row's Dr/Cr dropdown after React renders it
+    setTimeout(() => {
+        const nextId = `type-${newKey}`;
+        const el = document.getElementById(nextId);
+        if (el) el.focus();
+    }, 50);
   };
 
-  const totalDr = entries.filter(e => e.is_debit).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-  const totalCr = entries.filter(e => !e.is_debit).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-  const isValid = totalDr > 0 && totalDr === totalCr;
+  const removeEntry = (key) => {
+    if (entries.length <= 1) return; 
+    setEntries(entries.filter(e => e.key !== key));
+  };
 
   const handleSubmit = async (values) => {
     if (!isValid) {
@@ -85,7 +124,6 @@ const VoucherEntry = () => {
       return;
     }
 
-    // Filter out empty rows
     const validEntries = entries.filter(e => e.ledger_id && e.amount > 0);
 
     const payload = {
@@ -128,9 +166,16 @@ const VoucherEntry = () => {
       width: '10%',
       render: (is_debit, record) => (
         <Select 
+          id={`type-${record.key}`}
           value={is_debit ? 'Dr' : 'Cr'} 
           onChange={(val) => handleEntryChange(record.key, 'is_debit', val === 'Dr')}
           style={{ width: '100%' }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+                const particularEl = document.getElementById(`particular-${record.key}`);
+                if (particularEl) particularEl.focus();
+            }
+          }}
         >
           <Option value="Dr">Dr</Option>
           <Option value="Cr">Cr</Option>
@@ -141,85 +186,117 @@ const VoucherEntry = () => {
       title: 'Particulars (Ledger)',
       dataIndex: 'ledger_id',
       width: '40%',
-      render: (text, record) => (
-        <Select
-          showSearch
-          optionFilterProp="children"
-          value={record.ledger_id}
-          onChange={(val) => handleEntryChange(record.key, 'ledger_id', val)}
-          style={{ width: '100%' }}
-          placeholder="Select or type ledger..."
-        >
-          {ledgers.map(l => <Option key={l.id} value={l.id}>{l.name}</Option>)}
-        </Select>
-      )
+      render: (text, record) => {
+        const selectedLedger = ledgers.find(l => l.id === record.ledger_id);
+        const balanceText = selectedLedger 
+            ? `Current Bal: ₹ ${Math.abs(selectedLedger.opening_balance).toLocaleString()} ${selectedLedger.is_debit_balance ? 'Dr' : 'Cr'}`
+            : '';
+
+        return (
+            <div>
+                <Select
+                    id={`particular-${record.key}`}
+                    showSearch
+                    optionFilterProp="children"
+                    value={record.ledger_id}
+                    onChange={(val) => handleEntryChange(record.key, 'ledger_id', val)}
+                    style={{ width: '100%' }}
+                    placeholder="Select or type ledger..."
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && record.ledger_id) {
+                            const amountId = record.is_debit ? `dr-${record.key}` : `cr-${record.key}`;
+                            const el = document.getElementById(amountId);
+                            if (el) el.focus();
+                        }
+                    }}
+                >
+                    {ledgers.map(l => <Option key={l.id} value={l.id}>{l.name}</Option>)}
+                </Select>
+                {balanceText && <div style={{ fontSize: '11px', color: '#888', marginTop: '2px', fontStyle: 'italic' }}>{balanceText}</div>}
+            </div>
+        );
+      }
     },
     {
       title: 'Debit Amount',
       dataIndex: 'debit_amount',
       width: '20%',
-      render: (text, record) => record.is_debit ? (
+      render: (text, record) => (
         <Input 
+          id={`dr-${record.key}`}
           type="number" 
-          value={record.amount} 
+          disabled={!record.is_debit}
+          value={record.is_debit ? record.amount : ''} 
           onChange={(e) => handleEntryChange(record.key, 'amount', e.target.value)}
+          style={{ width: '100%', textAlign: 'right', backgroundColor: record.is_debit ? '#fff' : '#f5f5f5' }}
           onPressEnter={(e) => {
-            // Tally Enter behavior: move to next
-            const form = e.target.form;
-            const index = Array.prototype.indexOf.call(form, e.target);
-            form.elements[index + 1]?.focus();
-            e.preventDefault();
+            if (record.amount > 0) {
+                if (isValid) {
+                    form.getFieldInstance('narration').focus();
+                } else {
+                    addRowAndBalance(record.key);
+                }
+            }
           }}
         />
-      ) : null
+      )
     },
     {
       title: 'Credit Amount',
       dataIndex: 'credit_amount',
       width: '20%',
-      render: (text, record) => !record.is_debit ? (
+      render: (text, record) => (
         <Input 
+          id={`cr-${record.key}`}
           type="number" 
-          value={record.amount} 
+          disabled={record.is_debit}
+          value={!record.is_debit ? record.amount : ''} 
           onChange={(e) => handleEntryChange(record.key, 'amount', e.target.value)}
+          style={{ width: '100%', textAlign: 'right', backgroundColor: !record.is_debit ? '#fff' : '#f5f5f5' }}
           onPressEnter={(e) => {
-             // Tally Enter behavior
-            const form = e.target.form;
-            const index = Array.prototype.indexOf.call(form, e.target);
-            form.elements[index + 1]?.focus();
-            e.preventDefault();
+            if (record.amount > 0) {
+                if (isValid) {
+                    form.getFieldInstance('narration').focus();
+                } else {
+                    addRowAndBalance(record.key);
+                }
+            }
           }}
         />
-      ) : null
+      )
     },
     {
       title: '',
       key: 'action',
+      width: '5%',
       render: (_, record) => <Button type="link" danger onClick={() => removeEntry(record.key)}>X</Button>
     }
   ];
 
   return (
-    <div style={{ height: '100%', padding: '20px', backgroundColor: '#fdfadd', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', backgroundColor: '#002140', color: 'white', padding: '10px' }}>
+    <div style={{ height: '100%', padding: '20px', backgroundColor: '#fdfadd', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', backgroundColor: '#002140', color: 'white', padding: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
         <Title level={4} style={{ color: 'white', margin: 0 }}>Voucher {id ? 'Alteration' : 'Creation'}</Title>
-        <div>
-          <Text style={{ color: 'white', marginRight: '15px' }}>Type: {voucherType} | Hotkeys: F4 Contra, F5 Pmt, F7 Jrnl</Text>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ backgroundColor: '#008080', padding: '2px 10px', marginRight: '20px', fontSize: '13px', fontWeight: 'bold' }}>
+            Type: {VOUCHER_TYPE_NAMES[voucherType] || 'Journal'}
+          </div>
+          <Text style={{ color: 'white', marginRight: '15px', fontSize: '12px' }}>Hotkeys: F4 Contra, F5 Pmt, F6 Recpt, F7 Jrnl</Text>
           <Button danger size="small" onClick={() => navigate('/')}>[Esc] Quit</Button>
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#fff', padding: '20px', border: '1px solid #d9d9d9' }}>
+      <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#fff', padding: '20px', border: '1px solid #d9d9d9', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)' }}>
         <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ date: dayjs() }}>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item name="date" label="Voucher Date" rules={[{ required: true }]}>
-                <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
+          <Row gutter={16} style={{ borderBottom: '1px solid #eee', paddingBottom: '15px', marginBottom: '15px' }}>
+            <Col span={6}>
+              <Form.Item name="date" label={<Text strong style={{ fontSize: '12px' }}>Voucher Date</Text>} rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+                <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" size="small" />
               </Form.Item>
             </Col>
-            <Col span={8}>
-              <Form.Item name="voucher_number" label="Voucher No.">
-                <Input placeholder="Auto Generated" />
+            <Col span={6}>
+              <Form.Item name="voucher_number" label={<Text strong style={{ fontSize: '12px' }}>Voucher No.</Text>} style={{ marginBottom: 0 }}>
+                <Input placeholder="Auto Generated" size="small" />
               </Form.Item>
             </Col>
           </Row>
@@ -231,30 +308,39 @@ const VoucherEntry = () => {
             size="small"
             bordered
             rowClassName="editable-row"
-            scroll={{ y: 'calc(100vh - 450px)' }}
+            scroll={{ y: 'calc(100vh - 480px)' }}
+            style={{ border: '1px solid #f0f0f0' }}
             summary={() => (
               <Table.Summary.Row style={{ backgroundColor: '#fafafa', fontWeight: 'bold' }}>
-                <Table.Summary.Cell index={0} colSpan={2}>Total</Table.Summary.Cell>
-                <Table.Summary.Cell index={1}>
-                  <Text type={totalDr !== totalCr ? "danger" : ""}>{totalDr.toFixed(2)}</Text>
+                <Table.Summary.Cell index={0} colSpan={2} style={{ textAlign: 'right' }}>Total</Table.Summary.Cell>
+                <Table.Summary.Cell index={1} style={{ textAlign: 'right' }}>
+                  <Text type={totalDr !== totalCr ? "danger" : ""} style={{ fontSize: '14px' }}>{totalDr.toFixed(2)}</Text>
                 </Table.Summary.Cell>
-                <Table.Summary.Cell index={2}>
-                  <Text type={totalDr !== totalCr ? "danger" : ""}>{totalCr.toFixed(2)}</Text>
+                <Table.Summary.Cell index={2} style={{ textAlign: 'right' }}>
+                  <Text type={totalDr !== totalCr ? "danger" : ""} style={{ fontSize: '14px' }}>{totalCr.toFixed(2)}</Text>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={3} />
               </Table.Summary.Row>
             )}
           />
 
-          <Form.Item name="narration" label="Narration" style={{ marginTop: '20px' }}>
-            <Input.TextArea rows={2} onPressEnter={(e) => e.preventDefault()} />
-          </Form.Item>
+          <Row gutter={16} style={{ marginTop: '20px' }}>
+            <Col span={24}>
+              <Form.Item name="narration" label={<Text strong style={{ fontSize: '12px' }}>Narration</Text>} style={{ marginBottom: '10px' }}>
+                <Input.TextArea rows={2} onPressEnter={(e) => {
+                    // Do nothing on Enter here to allow multiline if needed, or just let form submit on Tab -> Button
+                }} />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" disabled={!isValid} style={{ width: '100%' }}>
-              {id ? 'Update Voucher' : 'Save Voucher (Ctrl+A)'}
-            </Button>
-          </Form.Item>
+          <Row>
+            <Col span={24}>
+              <Button type="primary" htmlType="submit" disabled={!isValid} style={{ width: '100%', height: '40px', fontWeight: 'bold', backgroundColor: isValid ? '#008080' : '#d9d9d9', border: 'none' }}>
+                {id ? 'Update Voucher' : 'Save Voucher (Ctrl+A)'}
+              </Button>
+            </Col>
+          </Row>
         </Form>
       </div>
     </div>
