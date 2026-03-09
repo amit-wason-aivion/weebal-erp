@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from models import Base
 
 import os
@@ -17,8 +17,8 @@ SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postg
 def create_database_if_not_exists(db_url):
     parsed = urlparse(db_url)
     db_name = parsed.path.lstrip('/')
-    user = parsed.username
-    password = parsed.password
+    user = unquote(parsed.username) if parsed.username else None
+    password = unquote(parsed.password) if parsed.password else None
     host = parsed.hostname
     port = parsed.port or 5432
 
