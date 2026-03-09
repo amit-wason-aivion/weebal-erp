@@ -104,6 +104,12 @@ class CompanyCreateSchema(BaseModel):
 class GroupCreateSchema(BaseModel):
     name: str
     parent_id: Optional[int] = None
+    company_id: Optional[int] = None # For Superadmin use
+
+class UOMCreateSchema(BaseModel):
+    symbol: str
+    formal_name: Optional[str] = None
+    company_id: Optional[int] = None # For Superadmin use
 
 class CompanySplitSchema(BaseModel):
     new_financial_year_start: date
@@ -344,9 +350,16 @@ def update_user(user_id: int, updates: UserUpdateSchema, db: Session = Depends(g
     return {"message": "User updated successfully"}
 
 @app.get("/api/ledgers")
-def get_ledgers(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_ledgers(company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Returns a list of all ledgers for the active company."""
-    ledgers = db.query(Ledger).filter(Ledger.company_id == current_user.company_id).all()
+    target_cid = current_user.company_id
+    if current_user.role == "superadmin" and company_id:
+        target_cid = company_id
+        
+    if not target_cid:
+        return []
+        
+    ledgers = db.query(Ledger).filter(Ledger.company_id == target_cid).all()
     return [{"id": l.id, "name": l.name, "group_id": l.group_id, "opening_balance": float(l.opening_balance), "is_debit_balance": l.is_debit_balance} for l in ledgers]
 
 @app.post("/api/ledgers")
@@ -355,15 +368,26 @@ def create_ledger(ledger: LedgerCreateSchema, background_tasks: BackgroundTasks,
     if not current_user.can_manage_masters:
         raise HTTPException(status_code=403, detail="Permission denied to manage masters")
         
-    from decimal import Decimal
-    db_ledger = db.query(Ledger).filter(Ledger.name == ledger.name, Ledger.company_id == current_user.company_id).first()
+    target_cid = current_user.company_id
+    # Note: LedgerCreateSchema doesn't have company_id, so we assume Superadmin is assigned to a company in frontend or context.
+    # For now, if Superadmin company_id is None, we need a way to assign it.
+    if target_cid is None and current_user.role == "superadmin":
+         # Fallback: find the latest company or a default to prevent NULL failure if no company is selected
+         latest = db.query(Company).order_by(Company.id.desc()).first()
+         if latest:
+             target_cid = latest.id
+    
+    if not target_cid:
+        raise HTTPException(status_code=400, detail="No active company context for ledger creation")
+
+    db_ledger = db.query(Ledger).filter(Ledger.name == ledger.name, Ledger.company_id == target_cid).first()
     if db_ledger:
         raise HTTPException(status_code=400, detail="Ledger already exists in this company")
     
     new_ledger = Ledger(
         name=ledger.name,
         group_id=ledger.group_id,
-        company_id=current_user.company_id,
+        company_id=target_cid,
         opening_balance=Decimal(str(ledger.opening_balance)),
         is_debit_balance=ledger.is_debit_balance
     )
@@ -374,10 +398,17 @@ def create_ledger(ledger: LedgerCreateSchema, background_tasks: BackgroundTasks,
     return new_ledger
 
 @app.get("/api/groups")
-def get_groups(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_groups(company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Returns all Tally Groups."""
     from models import TallyGroup
-    groups = db.query(TallyGroup).filter(TallyGroup.company_id == current_user.company_id).all()
+    target_cid = current_user.company_id
+    if current_user.role == "superadmin" and company_id:
+        target_cid = company_id
+
+    if not target_cid:
+        return []
+
+    groups = db.query(TallyGroup).filter(TallyGroup.company_id == target_cid).all()
     # Include parent_id for local hierarchy mapping in frontend
     return [{"id": g.id, "name": g.name, "parent_id": g.parent_id} for g in groups]
 
@@ -387,13 +418,23 @@ def create_group(group: GroupCreateSchema, db: Session = Depends(get_db), curren
     if not current_user.can_manage_masters:
         raise HTTPException(status_code=403, detail="Permission denied to manage masters")
     
-    db_group = db.query(TallyGroup).filter(TallyGroup.name == group.name, TallyGroup.company_id == current_user.company_id).first()
+    target_cid = current_user.company_id or group.company_id
+    
+    if target_cid is None and current_user.role == "superadmin":
+         latest = db.query(Company).order_by(Company.id.desc()).first()
+         if latest:
+             target_cid = latest.id
+
+    if not target_cid:
+        raise HTTPException(status_code=400, detail="No active company context for group creation")
+
+    db_group = db.query(TallyGroup).filter(TallyGroup.name == group.name, TallyGroup.company_id == target_cid).first()
     if db_group:
         raise HTTPException(status_code=400, detail="Group already exists in this company")
     
     new_group = TallyGroup(
         name=group.name,
-        company_id=current_user.company_id,
+        company_id=target_cid,
         parent_id=group.parent_id
     )
     db.add(new_group)
@@ -735,11 +776,49 @@ def create_stock_item(item: StockItemCreateSchema, db: Session = Depends(get_db)
     return new_item
 
 @app.get("/api/uoms")
-def get_uoms(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    """Returns all Units of Measure for the company."""
+def get_uoms(company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Returns a list of all Units of Measure for the active company."""
     from models import UnitOfMeasure
-    uoms = db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == current_user.company_id).all()
+    target_cid = current_user.company_id
+    if current_user.role == "superadmin" and company_id:
+        target_cid = company_id
+        
+    if not target_cid:
+        return []
+        
+    uoms = db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == target_cid).all()
     return [{"id": u.id, "symbol": u.symbol, "formal_name": u.formal_name} for u in uoms]
+
+@app.post("/api/uoms")
+def create_uom(uom: UOMCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Creates a new Unit of Measure."""
+    from models import UnitOfMeasure
+    if not current_user.can_manage_masters:
+        raise HTTPException(status_code=403, detail="Permission denied to manage masters")
+    
+    target_cid = current_user.company_id or uom.company_id
+    
+    if target_cid is None and current_user.role == "superadmin":
+         latest = db.query(Company).order_by(Company.id.desc()).first()
+         if latest:
+             target_cid = latest.id
+
+    if not target_cid:
+        raise HTTPException(status_code=400, detail="No active company context for UOM creation")
+
+    db_uom = db.query(UnitOfMeasure).filter(UnitOfMeasure.symbol == uom.symbol, UnitOfMeasure.company_id == target_cid).first()
+    if db_uom:
+        raise HTTPException(status_code=400, detail="UOM already exists in this company")
+    
+    new_uom = UnitOfMeasure(
+        symbol=uom.symbol,
+        formal_name=uom.formal_name,
+        company_id=target_cid
+    )
+    db.add(new_uom)
+    db.commit()
+    db.refresh(new_uom)
+    return new_uom
 
 @app.post("/api/sales-invoice")
 def create_sales_invoice(invoice: SalesInvoiceSchema, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

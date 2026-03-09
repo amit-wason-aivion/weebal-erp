@@ -1,31 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Drawer, Form, Input, Select, InputNumber, Space, Typography, message, Card, Tag } from 'antd';
-import { PlusOutlined, SearchOutlined, ArrowLeftOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { Table, Button, Drawer, Form, Input, Select, InputNumber, Space, Typography, message, Card, Tag, Tabs, Modal } from 'antd';
+import { PlusOutlined, SearchOutlined, ArrowLeftOutlined, ShoppingCartOutlined, InboxOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useCompany } from '../context/CompanyContext';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const InventoryInfo = () => {
+    const { activeCompany } = useCompany();
     const [items, setItems] = useState([]);
     const [uoms, setUoms] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [drawerVisible, setDrawerVisible] = useState(false);
-    const [searchText, setSearchText] = useState('');
-    const [form] = Form.useForm();
+    const [itemDrawerVisible, setItemDrawerVisible] = useState(false);
+    const [uomModalVisible, setUomModalVisible] = useState(false);
+    const [itemSearchText, setItemSearchText] = useState('');
+    const [uomSearchText, setUomSearchText] = useState('');
+    const [itemForm] = Form.useForm();
+    const [uomForm] = Form.useForm();
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (activeCompany) {
+            fetchData();
+        }
+    }, [activeCompany]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            const config = {
+                params: { company_id: activeCompany?.id }
+            };
             const [itemRes, uomRes] = await Promise.all([
-                axios.get('http://localhost:8000/api/stock-items'),
-                axios.get('http://localhost:8000/api/uoms')
+                axios.get('http://localhost:8000/api/stock-items', config),
+                axios.get('http://localhost:8000/api/uoms', config)
             ]);
             setItems(itemRes.data);
             setUoms(uomRes.data);
@@ -36,13 +46,14 @@ const InventoryInfo = () => {
         }
     };
 
-    const handleCreate = async (values) => {
+    const handleCreateItem = async (values) => {
         setLoading(true);
         try {
-            await axios.post('http://localhost:8000/api/inventory/items', values);
+            const payload = { ...values, company_id: activeCompany?.id };
+            await axios.post('http://localhost:8000/api/inventory/items', payload);
             message.success("Stock Item created successfully");
-            setDrawerVisible(false);
-            form.resetFields();
+            setItemDrawerVisible(false);
+            itemForm.resetFields();
             fetchData();
         } catch (error) {
             message.error(error.response?.data?.detail || "Failed to create stock item");
@@ -51,7 +62,23 @@ const InventoryInfo = () => {
         }
     };
 
-    const columns = [
+    const handleCreateUOM = async (values) => {
+        setLoading(true);
+        try {
+            const payload = { ...values, company_id: activeCompany?.id };
+            await axios.post('http://localhost:8000/api/uoms', payload);
+            message.success("Unit of Measure created successfully");
+            setUomModalVisible(false);
+            uomForm.resetFields();
+            fetchData();
+        } catch (error) {
+            message.error(error.response?.data?.detail || "Failed to create UOM");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const itemColumns = [
         {
             title: 'Item Name',
             dataIndex: 'name',
@@ -84,51 +111,111 @@ const InventoryInfo = () => {
         }
     ];
 
+    const uomColumns = [
+        {
+            title: 'Symbol',
+            dataIndex: 'symbol',
+            key: 'symbol',
+            sorter: (a, b) => a.symbol.localeCompare(b.symbol),
+            render: (text) => <Text strong style={{ color: '#008080' }}>{text}</Text>
+        },
+        {
+            title: 'Formal Name',
+            dataIndex: 'formal_name',
+            key: 'formal_name',
+            render: (text) => text || '-'
+        }
+    ];
+
     const filteredItems = items.filter(i => 
-        i.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        (i.hsn_sac && i.hsn_sac.includes(searchText))
+        i.name.toLowerCase().includes(itemSearchText.toLowerCase()) ||
+        (i.hsn_sac && i.hsn_sac.includes(itemSearchText))
+    );
+
+    const filteredUoms = uoms.filter(u => 
+        u.symbol.toLowerCase().includes(uomSearchText.toLowerCase()) ||
+        (u.formal_name && u.formal_name.toLowerCase().includes(uomSearchText.toLowerCase()))
+    );
+
+    const ItemsTab = (
+        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <Input 
+                    placeholder="Search Items/HSN..." 
+                    prefix={<SearchOutlined />} 
+                    onChange={e => setItemSearchText(e.target.value)}
+                    style={{ width: 250 }}
+                />
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => setItemDrawerVisible(true)} style={{ backgroundColor: '#008080', borderColor: '#008080' }}>
+                    Create Stock Item
+                </Button>
+            </div>
+            <Table 
+                dataSource={filteredItems} 
+                columns={itemColumns} 
+                rowKey="id" 
+                loading={loading}
+                pagination={{ pageSize: 12 }}
+                size="small"
+                bordered
+            />
+        </Space>
+    );
+
+    const UomsTab = (
+        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <Input 
+                    placeholder="Search UOMs..." 
+                    prefix={<SearchOutlined />} 
+                    onChange={e => setUomSearchText(e.target.value)}
+                    style={{ width: 250 }}
+                />
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => setUomModalVisible(true)} style={{ backgroundColor: '#008000', borderColor: '#008000' }}>
+                    Create UOM
+                </Button>
+            </div>
+            <Table 
+                dataSource={filteredUoms} 
+                columns={uomColumns} 
+                rowKey="id" 
+                loading={loading}
+                pagination={{ pageSize: 12 }}
+                size="small"
+                bordered
+            />
+        </Space>
     );
 
     return (
         <div style={{ padding: '20px', backgroundColor: '#fdfadd', minHeight: '100vh', fontFamily: 'Arial' }}>
             <Card style={{ border: '1px solid #a0a0a0', borderRadius: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid #008080', paddingBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '2px solid #008080', paddingBottom: '10px' }}>
                     <Space>
                         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} type="text" />
-                        <Title level={4} style={{ margin: 0, color: '#008080' }}>Inventory Information (Stock Items)</Title>
+                        <Title level={4} style={{ margin: 0, color: '#008080' }}>Inventory Information</Title>
                     </Space>
-                    <Space>
-                        <Input 
-                            placeholder="Search Items/HSN..." 
-                            prefix={<SearchOutlined />} 
-                            onChange={e => setSearchText(e.target.value)}
-                            style={{ width: 250 }}
-                        />
-                        <Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerVisible(true)} style={{ backgroundColor: '#008080', borderColor: '#008080' }}>
-                            Create Stock Item
-                        </Button>
-                    </Space>
+                    {activeCompany && <Text type="secondary">Company: {activeCompany.name}</Text>}
                 </div>
 
-                <Table 
-                    dataSource={filteredItems} 
-                    columns={columns} 
-                    rowKey="id" 
-                    loading={loading}
-                    pagination={{ pageSize: 12 }}
-                    size="small"
-                    bordered
-                />
+                <Tabs defaultActiveKey="1">
+                    <Tabs.TabPane tab={<span><ShoppingCartOutlined />Stock Items</span>} key="1">
+                        {ItemsTab}
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab={<span><InboxOutlined />Units of Measure</span>} key="2">
+                        {UomsTab}
+                    </Tabs.TabPane>
+                </Tabs>
             </Card>
 
             <Drawer
                 title="Create New Stock Item"
                 width={400}
-                onClose={() => setDrawerVisible(false)}
-                open={drawerVisible}
+                onClose={() => setItemDrawerVisible(false)}
+                open={itemDrawerVisible}
                 bodyStyle={{ paddingBottom: 80 }}
             >
-                <Form form={form} layout="vertical" onFinish={handleCreate} initialValues={{ gst_rate: 18 }}>
+                <Form form={itemForm} layout="vertical" onFinish={handleCreateItem} initialValues={{ gst_rate: 18 }}>
                     <Form.Item name="name" label="Item Name" rules={[{ required: true, message: 'Please enter item name' }]}>
                         <Input placeholder="e.g. Paracetamol 500mg, Laptop Dell" />
                     </Form.Item>
@@ -149,7 +236,7 @@ const InventoryInfo = () => {
 
                     <Form.Item>
                         <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                            <Button onClick={() => setDrawerVisible(false)}>Cancel</Button>
+                            <Button onClick={() => setItemDrawerVisible(false)}>Cancel</Button>
                             <Button type="primary" htmlType="submit" loading={loading} style={{ backgroundColor: '#008080', borderColor: '#008080' }}>
                                 Create
                             </Button>
@@ -157,6 +244,30 @@ const InventoryInfo = () => {
                     </Form.Item>
                 </Form>
             </Drawer>
+
+            <Modal
+                title="Create New Unit of Measure (UOM)"
+                open={uomModalVisible}
+                onCancel={() => setUomModalVisible(false)}
+                footer={null}
+            >
+                <Form form={uomForm} layout="vertical" onFinish={handleCreateUOM}>
+                    <Form.Item name="symbol" label="Symbol" rules={[{ required: true, message: 'e.g. NOS, KGS, PCS' }]}>
+                        <Input placeholder="Uppercase symbol" />
+                    </Form.Item>
+                    <Form.Item name="formal_name" label="Formal Name" rules={[{ required: true, message: 'e.g. Numbers, Kilograms, Pieces' }]}>
+                        <Input placeholder="Full name of unit" />
+                    </Form.Item>
+                    <Form.Item>
+                        <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                            <Button onClick={() => setUomModalVisible(false)}>Cancel</Button>
+                            <Button type="primary" htmlType="submit" loading={loading} style={{ backgroundColor: '#008000', borderColor: '#008000' }}>
+                                Create UOM
+                            </Button>
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 };

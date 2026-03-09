@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import TallyGroup, Ledger, VoucherType
+from models import TallyGroup, Ledger, VoucherType, UnitOfMeasure, Godown
 
 def seed_default_accounts(db: Session, company_id: int):
     """
@@ -82,5 +82,34 @@ def seed_default_accounts(db: Session, company_id: int):
         is_debit_balance=False
     )
     db.add(pl_ledger)
+    
+    db.flush()
+    
+    # 4. Seed Default Inventory (Godown & UOM)
+    # The user requested this to run right after accounts are seeded.
+    seed_default_inventory(db, company_id)
+
+def seed_default_inventory(db: Session, company_id: int):
+    """
+    Seeds standard Unit of Measure (NOS) and default Godown (Main Location).
+    """
+    # 1. Seed Default UOM (NOS)
+    uom_nos = db.query(UnitOfMeasure).filter(UnitOfMeasure.symbol == "NOS", UnitOfMeasure.company_id == company_id).first()
+    if not uom_nos:
+        uom_nos = UnitOfMeasure(
+            company_id=company_id,
+            symbol="NOS",
+            formal_name="Numbers"
+        )
+        db.add(uom_nos)
+    
+    # 2. Seed Default Godown (Main Location)
+    godown_main = db.query(Godown).filter(Godown.name == "Main Location", Godown.company_id == company_id).first()
+    if not godown_main:
+        godown_main = Godown(
+            company_id=company_id,
+            name="Main Location"
+        )
+        db.add(godown_main)
     
     db.flush()

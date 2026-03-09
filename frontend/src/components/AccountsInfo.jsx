@@ -3,11 +3,13 @@ import { Table, Button, Drawer, Form, Input, Select, InputNumber, Switch, Space,
 import { PlusOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useCompany } from '../context/CompanyContext';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const AccountsInfo = () => {
+    const { activeCompany } = useCompany();
     const [ledgers, setLedgers] = useState([]);
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -20,15 +22,20 @@ const AccountsInfo = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (activeCompany) {
+            fetchData();
+        }
+    }, [activeCompany]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            const config = {
+                params: { company_id: activeCompany?.id }
+            };
             const [ledgerRes, groupRes] = await Promise.all([
-                axios.get('http://localhost:8000/api/ledgers'),
-                axios.get('http://localhost:8000/api/groups')
+                axios.get('http://localhost:8000/api/ledgers', config),
+                axios.get('http://localhost:8000/api/groups', config)
             ]);
             setLedgers(ledgerRes.data);
             setGroups(groupRes.data);
@@ -42,7 +49,9 @@ const AccountsInfo = () => {
     const handleCreateLedger = async (values) => {
         setLoading(true);
         try {
-            await axios.post('http://localhost:8000/api/ledgers', values);
+            // Include company_id in values if Superadmin
+            const payload = { ...values, company_id: activeCompany?.id };
+            await axios.post('http://localhost:8000/api/ledgers', payload);
             message.success("Ledger created successfully");
             setLedgerDrawerVisible(false);
             ledgerForm.resetFields();
@@ -57,7 +66,8 @@ const AccountsInfo = () => {
     const handleCreateGroup = async (values) => {
         setLoading(true);
         try {
-            await axios.post('http://localhost:8000/api/groups', values);
+            const payload = { ...values, company_id: activeCompany?.id };
+            await axios.post('http://localhost:8000/api/groups', payload);
             message.success("Group created successfully");
             setGroupModalVisible(false);
             groupForm.resetFields();
@@ -83,7 +93,7 @@ const AccountsInfo = () => {
             title: 'Group',
             dataIndex: 'group_id',
             key: 'group_id',
-            render: (groupId) => groups.find(g => g.id === groupId)?.name || 'Unknown'
+            render: (groupId) => groups.find(g => String(g.id) === String(groupId))?.name || 'Unknown'
         },
         {
             title: 'Opening Balance',
@@ -110,7 +120,7 @@ const AccountsInfo = () => {
             title: 'Under (Parent Group)',
             dataIndex: 'parent_id',
             key: 'parent_id',
-            render: (pid) => groups.find(g => g.id === pid)?.name || <Text type="secondary">Primary</Text>
+            render: (pid) => groups.find(g => String(g.id) === String(pid))?.name || <Text type="secondary">Primary</Text>
         }
     ];
 

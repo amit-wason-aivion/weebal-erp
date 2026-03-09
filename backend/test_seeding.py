@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import TallyGroup, Ledger, VoucherType, Company
+from models import TallyGroup, Ledger, VoucherType, Company, UnitOfMeasure, Godown
 
 DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/aivion_erp"
 engine = create_engine(DATABASE_URL)
@@ -25,6 +25,12 @@ if latest_company:
     
     vt_count = db.query(VoucherType).filter(VoucherType.company_id == cid).count()
     print(f"Voucher Types: {vt_count}")
+    
+    uom_count = db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == cid).count()
+    print(f"Units of Measure: {uom_count}")
+    
+    godown_count = db.query(Godown).filter(Godown.name == "Main Location", Godown.company_id == cid).count()
+    print(f"Default Godown (Main Location): {'Found' if godown_count > 0 else 'Not Found'}")
     
     if ledger_count > 0:
         ledgers = db.query(Ledger).filter(Ledger.company_id == cid).all()
