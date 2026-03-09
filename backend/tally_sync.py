@@ -7,7 +7,9 @@ import sys
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-TALLY_URL = "http://localhost:9000"
+import os
+
+TALLY_URL = os.getenv("TALLY_URL", "http://localhost:9000")
 
 def get_tally_ledgers_xml():
     """

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Typography, message, Button } from 'antd';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const { Title, Text } = Typography;
@@ -17,7 +17,7 @@ const LedgerVouchers = () => {
 
   const fetchLedgerVouchers = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/ledgers/${id}/vouchers`);
+      const res = await axios.get(`/api/ledgers/${id}/vouchers`);
       setLedgerData(res.data);
     } catch (err) {
       message.error("Failed to load Ledger Vouchers.");

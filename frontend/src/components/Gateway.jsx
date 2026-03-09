@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Row, Col, Typography, message } from 'antd';
+import axios from '../api/axios';
 
 import { useNavigate } from 'react-router-dom';
 import { useCompany } from '../context/CompanyContext';
@@ -52,7 +53,7 @@ const Gateway = () => {
       // Phase 14.7: Export Hotkey
       if (key === 'e' && isAdmin) {
         const token = localStorage.getItem('token');
-        const url = 'http://localhost:8000/api/sync/export-app-data';
+        const url = `${axios.defaults.baseURL}/api/sync/export-app-data`;
         
         // Use a hidden anchor to trigger download with Auth header
         fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })

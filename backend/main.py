@@ -38,10 +38,15 @@ from seeders import seed_default_accounts
 
 app = FastAPI(title="WEEBAL ERP API")
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Explicit CORS Origins
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    FRONTEND_URL,
     "http://localhost:8000",
 ]
 
@@ -61,7 +66,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "Internal Server Error", "error": str(exc)},
     )
     # Add CORS headers manually to error response
-    response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+    response.headers["Access-Control-Allow-Origin"] = FRONTEND_URL
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "*"

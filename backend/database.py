@@ -5,10 +5,14 @@ from sqlalchemy.orm import sessionmaker
 from urllib.parse import urlparse
 from models import Base
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 # Database Connection String
-# Update this with your actual PostgreSQL credentials if different
-# Format: postgresql://username:password@host:port/database_name
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/aivion_erp"
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/aivion_erp")
 
 def create_database_if_not_exists(db_url):
     parsed = urlparse(db_url)

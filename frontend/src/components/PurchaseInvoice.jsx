@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form as AntForm, Input as AntInput, Select as AntSelect, DatePicker as AntDatePicker, Button as AntButton, Table as AntTable, Typography as AntTypography, message as antMessage, Row as AntRow, Col as AntCol, Divider as AntDivider, Switch as AntSwitch, Upload as AntUpload, Spin as AntSpin } from 'antd';
 import { RobotOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import dayjs from 'dayjs';
 
 const { Title, Text } = AntTypography;
@@ -22,18 +22,18 @@ const PurchaseInvoice = () => {
 
   useEffect(() => {
     // Fetch ledgers for Party (Suppliers)
-    axios.get('http://localhost:8000/api/ledgers')
+    axios.get('/api/ledgers')
       .then(res => setLedgers(res.data))
       .catch(err => antMessage.error("Failed to load ledgers"));
 
     // Fetch stock items
-    axios.get('http://localhost:8000/api/stock-items')
+    axios.get('/api/stock-items')
       .then(res => setStockItems(res.data))
       .catch(err => antMessage.error("Failed to load stock items"));
 
     if (id) {
        setLoading(true);
-       axios.get(`http://localhost:8000/api/vouchers/${id}`)
+       axios.get(`/api/vouchers/${id}`)
          .then(res => {
             const v = res.data;
             const partyEntry = v.entries.find(e => !e.is_debit); // Credit for Purchase
@@ -63,7 +63,8 @@ const PurchaseInvoice = () => {
     formData.append('file', file);
 
     try {
-      const res = await axios.post('http://localhost:8000/api/ai/extract-invoice', formData, {
+      const res = await axios.post('/api/ai/extract-invoice'
+, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -167,7 +168,7 @@ const PurchaseInvoice = () => {
       // For now using sales API logic or dedicated purchase API if built
       // Assuming we need a POST /api/purchase-invoice or using vouchers
       // Since Phase 14 focus is AI, we'll try to use a generic voucher post for Purchase Type
-      const res = await axios.post('http://localhost:8000/api/vouchers', {
+      const res = await axios.post('/api/vouchers', {
         voucher_type_id: 4, // Purchase usually 4 in Tally
         voucher_number: values.invoice_number,
         date: values.date.format('YYYY-MM-DD'),

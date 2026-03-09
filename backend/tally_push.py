@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 from models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry, StockItem
 import datetime
 
-TALLY_URL = "http://localhost:9000"
+import os
+
+TALLY_URL = os.getenv("TALLY_URL", "http://localhost:9000")
 
 def generate_voucher_xml(voucher_id: int, db: Session):
     """

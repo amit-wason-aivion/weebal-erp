@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Drawer, Form, Input, Select, InputNumber, Switch, Space, Typography, message, Card, Tabs, Modal } from 'antd';
 import { PlusOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useCompany } from '../context/CompanyContext';
 
 const { Title, Text } = Typography;
@@ -34,8 +34,8 @@ const AccountsInfo = () => {
                 params: { company_id: activeCompany?.id }
             };
             const [ledgerRes, groupRes] = await Promise.all([
-                axios.get('http://localhost:8000/api/ledgers', config),
-                axios.get('http://localhost:8000/api/groups', config)
+                axios.get('/api/ledgers', config),
+                axios.get('/api/groups', config)
             ]);
             setLedgers(ledgerRes.data);
             setGroups(groupRes.data);
@@ -51,7 +51,7 @@ const AccountsInfo = () => {
         try {
             // Include company_id in values if Superadmin
             const payload = { ...values, company_id: activeCompany?.id };
-            await axios.post('http://localhost:8000/api/ledgers', payload);
+            await axios.post('/api/ledgers', payload);
             message.success("Ledger created successfully");
             setLedgerDrawerVisible(false);
             ledgerForm.resetFields();
@@ -67,7 +67,7 @@ const AccountsInfo = () => {
         setLoading(true);
         try {
             const payload = { ...values, company_id: activeCompany?.id };
-            await axios.post('http://localhost:8000/api/groups', payload);
+            await axios.post('/api/groups', payload);
             message.success("Group created successfully");
             setGroupModalVisible(false);
             groupForm.resetFields();

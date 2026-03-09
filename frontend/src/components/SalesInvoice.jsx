@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, DatePicker, Button, Table, Typography, message, Row, Col, Divider, Switch } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
@@ -20,18 +20,18 @@ const SalesInvoice = () => {
 
   useEffect(() => {
     // Fetch ledgers for Party
-    axios.get('http://localhost:8000/api/ledgers')
+    axios.get('/api/ledgers')
       .then(res => setLedgers(res.data))
       .catch(err => message.error("Failed to load ledgers"));
 
     // Fetch stock items
-    axios.get('http://localhost:8000/api/stock-items')
+    axios.get('/api/stock-items')
       .then(res => setStockItems(res.data))
       .catch(err => message.error("Failed to load stock items"));
 
     // If ID exists, fetch existing invoice details
     if (id) {
-       axios.get(`http://localhost:8000/api/vouchers/${id}`)
+       axios.get(`/api/vouchers/${id}`)
          .then(res => {
             const v = res.data;
             setIsInterstate(v.inventory.some(i => i.is_interstate) || false); // Simplify for now or check tax ledgers
@@ -144,7 +144,7 @@ const SalesInvoice = () => {
     };
 
     try {
-      const url = id ? `http://localhost:8000/api/sales-invoice/${id}` : 'http://localhost:8000/api/sales-invoice';
+      const url = id ? `/api/sales-invoice/${id}` : '/api/sales-invoice';
       const method = id ? 'put' : 'post';
       const res = await axios[method](url, payload);
       

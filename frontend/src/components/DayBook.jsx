@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Typography, message, Button } from 'antd';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 
@@ -21,7 +21,7 @@ const DayBook = () => {
   const fetchDayBook = async () => {
     try {
       // For demo, we are fetching all by omitting date params, but you can pass ?date=${currentDate}
-      const res = await axios.get(`http://localhost:8000/api/daybook`);
+      const res = await axios.get('/api/daybook');
       setVouchers(res.data);
     } catch (err) {
       message.error("Failed to load Day Book.");

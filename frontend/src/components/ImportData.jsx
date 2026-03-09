@@ -15,7 +15,7 @@ const ImportData = () => {
     const handleSyncMasters = async () => {
         setSyncingMasters(true);
         try {
-            const response = await axios.post('http://localhost:8000/api/sync/import-ledgers');
+            const response = await axios.post('/api/sync/import-ledgers');
             message.success(response.data.message || "Masters synced successfully");
         } catch (error) {
             message.error(error.response?.data?.detail || "Failed to sync masters from Tally");
@@ -27,7 +27,7 @@ const ImportData = () => {
     const handleSyncTransactions = async () => {
         setSyncingTransactions(true);
         try {
-            const response = await axios.post('http://localhost:8000/api/sync/import-vouchers');
+            const response = await axios.post('/api/sync/import-vouchers');
             message.success(response.data.message || "Transactions synced successfully");
         } catch (error) {
             message.error(error.response?.data?.detail || "Failed to sync transactions from Tally");
@@ -44,7 +44,7 @@ const ImportData = () => {
             const formData = new FormData();
             formData.append('file', file);
             try {
-                const response = await axios.post('http://localhost:8000/api/sync/upload-tally-xml', formData, {
+                const response = await axios.post('/api/sync/upload-tally-xml', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 onSuccess(response.data);
@@ -72,7 +72,7 @@ const ImportData = () => {
             const formData = new FormData();
             formData.append('file', file);
             try {
-                const response = await axios.post('http://localhost:8000/api/sync/upload-app-json', formData, {
+                const response = await axios.post('/api/sync/upload-app-json', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 onSuccess(response.data);
@@ -195,7 +195,7 @@ const ImportData = () => {
                             icon={<CloudDownloadOutlined />} 
                             onClick={async () => {
                                 const token = localStorage.getItem('token');
-                                const url = 'http://localhost:8000/api/sync/export-app-data';
+                                const url = `${axios.defaults.baseURL}/api/sync/export-app-data`;
                                 fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
                                 .then(resp => resp.blob())
                                 .then(blob => {
@@ -221,7 +221,7 @@ const ImportData = () => {
                             style={{ backgroundColor: '#008080', borderColor: '#008080' }}
                             onClick={async () => {
                                 const token = localStorage.getItem('token');
-                                const url = 'http://localhost:8000/api/sync/export-tally-xml';
+                                const url = `${axios.defaults.baseURL}/api/sync/export-tally-xml`;
                                 fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
                                 .then(resp => resp.blob())
                                 .then(blob => {

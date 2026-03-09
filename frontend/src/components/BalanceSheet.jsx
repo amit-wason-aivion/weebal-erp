@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Typography, message, Row, Col, Card, Button } from 'antd';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
@@ -16,7 +16,7 @@ const BalanceSheet = () => {
 
   const fetchBalanceSheet = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/reports/balance-sheet');
+      const res = await axios.get('/api/reports/balance-sheet');
       setBsData(res.data);
     } catch (err) {
       message.error("Failed to load Balance Sheet.");

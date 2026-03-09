@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Drawer, Form, Input, Select, InputNumber, Space, Typography, message, Card, Tag, Tabs, Modal } from 'antd';
 import { PlusOutlined, SearchOutlined, ArrowLeftOutlined, ShoppingCartOutlined, InboxOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import { useCompany } from '../context/CompanyContext';
 
 const { Title, Text } = Typography;
@@ -34,8 +34,8 @@ const InventoryInfo = () => {
                 params: { company_id: activeCompany?.id }
             };
             const [itemRes, uomRes] = await Promise.all([
-                axios.get('http://localhost:8000/api/stock-items', config),
-                axios.get('http://localhost:8000/api/uoms', config)
+                axios.get('/api/stock-items', config),
+                axios.get('/api/uoms', config)
             ]);
             setItems(itemRes.data);
             setUoms(uomRes.data);
@@ -50,7 +50,7 @@ const InventoryInfo = () => {
         setLoading(true);
         try {
             const payload = { ...values, company_id: activeCompany?.id };
-            await axios.post('http://localhost:8000/api/inventory/items', payload);
+            await axios.post('/api/inventory/items', payload);
             message.success("Stock Item created successfully");
             setItemDrawerVisible(false);
             itemForm.resetFields();
@@ -66,7 +66,7 @@ const InventoryInfo = () => {
         setLoading(true);
         try {
             const payload = { ...values, company_id: activeCompany?.id };
-            await axios.post('http://localhost:8000/api/uoms', payload);
+            await axios.post('/api/uoms', payload);
             message.success("Unit of Measure created successfully");
             setUomModalVisible(false);
             uomForm.resetFields();

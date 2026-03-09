@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Select, DatePicker, Button, Table, Typography, message, Row, Col } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../api/axios';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
@@ -42,6 +42,10 @@ const VoucherEntry = () => {
         return;
       }
 
+      if (['F4', 'F5', 'F6', 'F7', 'F8', 'F9'].includes(e.key)) {
+        e.preventDefault();
+      }
+
       if (e.key === 'F4') setVoucherType('4'); // Contra
       if (e.key === 'F5') setVoucherType('5'); // Payment
       if (e.key === 'F6') setVoucherType('6'); // Receipt
@@ -56,12 +60,12 @@ const VoucherEntry = () => {
 
   useEffect(() => {
     // Fetch ledgers
-    axios.get('http://localhost:8000/api/ledgers')
+    axios.get('/api/ledgers')
       .then(res => setLedgers(res.data))
       .catch(err => message.error("Failed to load ledgers"));
 
     if (id) {
-      axios.get(`http://localhost:8000/api/vouchers/${id}`)
+      axios.get(`/api/vouchers/${id}`)
         .then(res => {
           const v = res.data;
           setVoucherType(v.voucher_type_id.toString());
@@ -139,7 +143,7 @@ const VoucherEntry = () => {
     };
 
     try {
-      const url = id ? `http://localhost:8000/api/vouchers/${id}` : 'http://localhost:8000/api/vouchers';
+      const url = id ? `/api/vouchers/${id}` : '/api/vouchers';
       const method = id ? 'put' : 'post';
       const res = await axios[method](url, payload);
       

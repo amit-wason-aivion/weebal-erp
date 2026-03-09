@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios from '../api/axios';
 
 // Basic Thunk to fetch Trial Balance data
 export const fetchTrialBalance = createAsyncThunk(
   'accounting/fetchTrialBalance',
   async () => {
-    const response = await axios.get('http://localhost:8000/api/trial-balance');
+    const response = await axios.get('/api/trial-balance');
     return response.data;
   }
 );
