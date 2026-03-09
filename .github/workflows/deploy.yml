@@ -53,31 +53,40 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-frontend # Stage backend update after frontend
     steps:
-      - name: SSH into VPS and Deploy Backend
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Secure Copy Backend Files to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "backend" 
+          target: "/home/weebalinfotech-accounts-api/htdocs/accounts-api.weebalinfotech.com/"
+          overwrite: true
+
+      - name: SSH Setup & Restart
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }} # root
+          username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # 1. Navigate to the backend site directory
-            echo "Navigating to backend site..."
             cd /home/weebalinfotech-accounts-api/htdocs/accounts-api.weebalinfotech.com/
             
-            # 2. Pull the latest code from GitHub
-            echo "Pulling latest changes from main branch..."
-            git pull origin main
+            # 1. Create a Python Virtual Environment if it is missing
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
             
-            # 3. Install/Update Python requirements using the site's specific venv
-            echo "Updating Python dependencies..."
-            /home/weebalinfotech-accounts-api/htdocs/accounts-api.weebalinfotech.com/venv/bin/pip install -r backend/requirements.txt
-            
-            # 4. Fix file ownership for the CloudPanel site user
-            echo "Applying ownership fixes..."
+            # 2. Fix permissions so CloudPanel owns the newly copied files
             chown -R weebalinfotech-accounts-api:weebalinfotech-accounts-api /home/weebalinfotech-accounts-api/htdocs/accounts-api.weebalinfotech.com/
             
-            # 5. Restart the Python Service using CloudPanel CLI
-            echo "Restarting service..."
+            # 3. Install your Python dependencies safely as the site user
+            sudo -u weebalinfotech-accounts-api ./venv/bin/pip install -r backend/requirements.txt
+            
+            # 4. Restart the CloudPanel App
             clpctl python:restart --domainName=accounts-api.weebalinfotech.com
             echo "Deployment completed successfully!"
 
