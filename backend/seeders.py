@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import TallyGroup, Ledger, VoucherType, UnitOfMeasure, Godown
+from .models import TallyGroup, Ledger, VoucherType, UnitOfMeasure, Godown
 
 def seed_default_accounts(db: Session, company_id: int):
     """

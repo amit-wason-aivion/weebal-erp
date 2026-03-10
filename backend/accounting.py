@@ -1,7 +1,7 @@
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from models import Voucher, VoucherEntry, Ledger, TallyGroup
+from .models import Voucher, VoucherEntry, Ledger, TallyGroup
 
 class AccountingEngine:
     """

@@ -21,20 +21,20 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from typing import List
 
-from models import Base, Ledger, TallyGroup, Voucher, VoucherEntry, User, Company
-from accounting import AccountingEngine
+from .models import Base, Ledger, TallyGroup, Voucher, VoucherEntry, User, Company
+from .accounting import AccountingEngine
 from pydantic import BaseModel
 from datetime import date
 
 # Database setup moved to database.py
-from database import engine, get_db, init_db
+from .database import engine, get_db, init_db
 
 # Initialize database tables
 init_db()
 
-from tally_push import sync_voucher_to_tally
-from auth import get_current_user, create_access_token, verify_password, get_password_hash
-from seeders import seed_default_accounts
+from .tally_push import sync_voucher_to_tally
+from .auth import get_current_user, create_access_token, verify_password, get_password_hash
+from .seeders import seed_default_accounts
 
 app = FastAPI(title="WEEBAL ERP API")
 

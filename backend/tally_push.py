@@ -1,7 +1,7 @@
 import requests
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import Session
-from models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry, StockItem
+from .models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry, StockItem
 import datetime
 
 import os

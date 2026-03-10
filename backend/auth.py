@@ -6,8 +6,8 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from database import get_db
-from models import User
+from .database import get_db
+from .models import User
 
 # Configuration
 SECRET_KEY = "SUPER_SECRET_AIVION_KEY_CHANGE_IN_PROD"

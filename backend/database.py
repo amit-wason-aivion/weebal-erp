@@ -3,7 +3,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from urllib.parse import urlparse, unquote
-from models import Base
+from .models import Base
 
 import os
 from dotenv import load_dotenv
