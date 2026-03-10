@@ -405,7 +405,7 @@ def create_ledger(ledger: LedgerCreateSchema, background_tasks: BackgroundTasks,
 @app.get("/api/groups")
 def get_groups(company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Returns all Tally Groups."""
-    from models import TallyGroup
+    from .models import TallyGroup
     target_cid = current_user.company_id
     if current_user.role == "superadmin" and company_id:
         target_cid = company_id
@@ -493,7 +493,7 @@ def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    from models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure
+    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure
     
     data = {
         "groups": [vars(g) for g in db.query(TallyGroup).filter(TallyGroup.company_id == current_user.company_id).all()],
@@ -549,7 +549,7 @@ async def upload_app_json(file: UploadFile = File(...), db: Session = Depends(ge
     except:
         raise HTTPException(status_code=400, detail="Invalid JSON file")
 
-    from models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure
+    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure
     
     # Simple restore logic (UPSERT by ID or Name where applicable)
     try:
@@ -783,7 +783,7 @@ def create_stock_item(item: StockItemCreateSchema, db: Session = Depends(get_db)
 @app.get("/api/uoms")
 def get_uoms(company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Returns a list of all Units of Measure for the active company."""
-    from models import UnitOfMeasure
+    from .models import UnitOfMeasure
     target_cid = current_user.company_id
     if current_user.role == "superadmin" and company_id:
         target_cid = company_id
@@ -797,7 +797,7 @@ def get_uoms(company_id: Optional[int] = None, db: Session = Depends(get_db), cu
 @app.post("/api/uoms")
 def create_uom(uom: UOMCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Creates a new Unit of Measure."""
-    from models import UnitOfMeasure
+    from .models import UnitOfMeasure
     if not current_user.can_manage_masters:
         raise HTTPException(status_code=403, detail="Permission denied to manage masters")
     
@@ -1027,7 +1027,7 @@ def update_sales_invoice(id: int, invoice: SalesInvoiceSchema, background_tasks:
 @app.get("/api/vouchers/{id}")
 def get_voucher(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Returns details for a specific voucher including inventory and entries."""
-    from models import VoucherType, InventoryEntry, StockItem
+    from .models import VoucherType, InventoryEntry, StockItem
 
     voucher = db.query(Voucher).filter(Voucher.id == id, Voucher.company_id == current_user.company_id).first()
     if not voucher:
@@ -1069,7 +1069,7 @@ def get_voucher(id: int, db: Session = Depends(get_db), current_user: User = Dep
 @app.get("/api/ledgers/{ledger_id}/vouchers")
 def get_ledger_vouchers(ledger_id: int, start_date: str = None, end_date: str = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Returns chronological list of Voucher_Entries for a specific ledger."""
-    from models import VoucherType, Ledger
+    from .models import VoucherType, Ledger
 
     ledger = db.query(Ledger).filter(Ledger.id == ledger_id, Ledger.company_id == current_user.company_id).first()
     if not ledger:
@@ -1153,7 +1153,7 @@ def get_ledger_vouchers(ledger_id: int, start_date: str = None, end_date: str = 
 @app.get("/api/daybook")
 def get_daybook(date: str = None, start_date: str = None, end_date: str = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Returns all vouchers for a specific date or date range."""
-    from models import VoucherType, Ledger
+    from .models import VoucherType, Ledger
 
     query = db.query(Voucher, VoucherType).join(VoucherType).filter(Voucher.company_id == current_user.company_id)
     
