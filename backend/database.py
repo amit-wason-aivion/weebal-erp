@@ -54,7 +54,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
     # Only use create_all for simple setups/tests. Migrations should use Alembic.
+    print("Initializing database tables...")
     Base.metadata.create_all(bind=engine)
+    print("Database tables initialized successfully.")
 
 def get_db():
     db = SessionLocal()

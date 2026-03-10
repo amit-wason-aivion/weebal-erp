@@ -33,26 +33,31 @@ const VoucherEntry = () => {
   // Tally hotkey listeners
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
-      // Don't trigger hotkeys if typing in an input (except Alt+A for save)
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
-        if (e.ctrlKey && e.key.toLowerCase() === 'a') {
-            e.preventDefault();
-            form.submit();
-        }
-        return;
-      }
-
+      // Always prevent browser default for F4-F9
       if (['F4', 'F5', 'F6', 'F7', 'F8', 'F9'].includes(e.key)) {
         e.preventDefault();
       }
 
+      // Handle specific keys
       if (e.key === 'F4') setVoucherType('4'); // Contra
       if (e.key === 'F5') setVoucherType('5'); // Payment
       if (e.key === 'F6') setVoucherType('6'); // Receipt
       if (e.key === 'F7') setVoucherType('1'); // Journal
       if (e.key === 'F8') setVoucherType('2'); // Sales
       if (e.key === 'F9') setVoucherType('3'); // Purchase
-      if (e.key === 'Escape') navigate('/');
+      
+      if (e.key === 'Escape') {
+          // Only navigate if NOT in an input (standard Tally behavior)
+          if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+              navigate('/');
+          }
+      }
+
+      // Handle Ctrl+A for Save
+      if (e.ctrlKey && e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          form.submit();
+      }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
@@ -68,6 +73,7 @@ const VoucherEntry = () => {
       axios.get(`/api/vouchers/${id}`)
         .then(res => {
           const v = res.data;
+          // Ensure voucherType is a string for state matching
           setVoucherType(v.voucher_type_id.toString());
           form.setFieldsValue({
             date: dayjs(v.date),

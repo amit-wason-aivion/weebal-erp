@@ -189,6 +189,9 @@ def create_company(company_data: CompanyCreateSchema, db: Session = Depends(get_
         raise HTTPException(status_code=403, detail="Only Superadmins can create companies")
     
     try:
+        # Ensure database tables exist before creating a company
+        init_db()
+        
         new_company = Company(**company_data.dict())
         db.add(new_company)
         db.flush() # Get ID for seeding
