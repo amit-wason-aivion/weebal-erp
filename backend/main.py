@@ -729,7 +729,7 @@ def update_voucher(id: int, voucher: VoucherSchema, background_tasks: Background
 
 # --- Phase 8.5: Sales Invoice Logic ---
 
-from models import StockItem, InventoryEntry
+from .models import StockItem, InventoryEntry
 
 class SalesInvoiceItemSchema(BaseModel):
     stock_item_id: int
