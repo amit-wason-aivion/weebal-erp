@@ -5,13 +5,58 @@ import logging
 import sys
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='tally_import.log',
+    filemode='a'
+)
 
 import os
 
 TALLY_URL = os.getenv("TALLY_URL", "http://localhost:9000")
 
-def get_tally_ledgers_xml():
+def parse_tally_amount(amt_text: str):
+    """
+    Parses Tally amount strings which can be '1000.00 Dr', '2000.00 Cr', or simply '-2000'
+    Returns (abs_amount, is_debit)
+    In Tally XML: 
+    - Master balances: positive is usually target, but suffixes Dr/Cr are explicit.
+    - Transaction amounts: usually negative is Debit, positive is Credit.
+    """
+    if not amt_text:
+        return 0.0, True
+    
+    clean_text = amt_text.strip()
+    is_debit = True
+    
+    # Handle suffixes
+    if clean_text.lower().endswith('dr'):
+        is_debit = True
+        clean_text = clean_text[:-2].strip()
+    elif clean_text.lower().endswith('cr'):
+        is_debit = False
+        clean_text = clean_text[:-2].strip()
+        
+    try:
+        val = float(clean_text)
+        # If it was a simple number without suffix:
+        # In Tally transactions, -ve is Debit.
+        # In some contexts, masters might use -ve for Credit.
+        # We will assume if suffix was present, it takes precedence.
+        # If no suffix and negative, we'll treat it as standard Tally logic (Debit = -ve for transactions)
+        # However, for Masters, it depends on the export style.
+        # Let's check for sign if no suffix was found above
+        if amt_text.strip() == clean_text: # No suffix was removed
+            if val < 0:
+                is_debit = True # Standard Tally XML transaction logic
+                val = abs(val)
+            else:
+                is_debit = False
+        
+        return abs(val), is_debit
+    except ValueError:
+        return 0.0, True
     """
     Constructs the Tally XML request to fetch all Ledgers.
     """
@@ -118,12 +163,12 @@ def parse_tally_ledger_xml_to_json(xml_content):
         logging.error(f"Failed to parse XML from Tally: {e}")
         return json.dumps({"error": "XML Parse Error"})
 
-def sync_ledgers_to_db(db, xml_content=None):
+def sync_ledgers_to_db(db, company_id: int, xml_content=None):
     """
     High-level function to sync ledgers from Tally to PostgreSQL.
     Accepts optional xml_content for file-based uploads.
     """
-    from models import Ledger, TallyGroup
+    from .models import Ledger, TallyGroup
     from sqlalchemy.orm import Session
     from decimal import Decimal
     
@@ -133,39 +178,75 @@ def sync_ledgers_to_db(db, xml_content=None):
     if not xml_content:
         return {"error": "Could not connect to Tally or no content provided"}
     
+    logging.info(f"sync_ledgers_to_db started. Company ID: {company_id}. XML size: {len(xml_content)}")
     root = ET.fromstring(xml_content)
     count = 0
-    for ledger_elem in root.iter('LEDGER'):
+    all_ledgers = list(root.iter('LEDGER'))
+    logging.info(f"Found {len(all_ledgers)} LEDGER elements in XML.")
+    
+    for ledger_elem in all_ledgers:
         name = ledger_elem.attrib.get('NAME')
+        if not name: 
+            name = ledger_elem.findtext('NAME')
         if not name: continue
+        
+        logging.info(f"Processing ledger: {name}")
         
         guid = ledger_elem.findtext('GUID')
         alterid = ledger_elem.findtext('ALTERID')
         parent_group_name = ledger_elem.findtext('PARENT')
-        
         # 1. Get or Create Group
-        group = db.query(TallyGroup).filter(TallyGroup.name == parent_group_name).first()
+        if not parent_group_name:
+            parent_group_name = "Primary" # Default for root groups
+            
+        group = db.query(TallyGroup).filter(TallyGroup.name == parent_group_name, TallyGroup.company_id == company_id).first()
         if not group:
-            group = TallyGroup(name=parent_group_name)
+            group = TallyGroup(name=parent_group_name, company_id=company_id)
             db.add(group)
             db.flush()
         
         # 2. Extract Balance
-        opening_bal = 0.0
-        is_debit = True
         opening_bal_elem = ledger_elem.find('OPENINGBALANCE')
-        if opening_bal_elem is not None and opening_bal_elem.text:
-            bal_text = opening_bal_elem.text.strip()
-            try:
-                amount = float(bal_text)
-                opening_bal = abs(amount)
-                is_debit = amount > 0
-            except: pass
+        bal_text = opening_bal_elem.text if opening_bal_elem is not None else ""
+        opening_bal, is_debit = parse_tally_amount(bal_text)
+        
+        # Override logic for Masters: Usually in masters, positive is Debit unless Cr suffix
+        # Actually Tally XML Masters: <OPENINGBALANCE>1000.00</OPENINGBALANCE> is Debit
+        # <OPENINGBALANCE>-1000.00</OPENINGBALANCE> is Credit
+        # But if it has " Cr", that's better.
+        # My parse_tally_amount handles suffixes.
+        
+        # 3. Extract Additional Info
+        address = ""
+        # Try finding ADDRESS.LIST directly under LEDGER or under LEDMAILINGDETAILS.LIST
+        address_list = ledger_elem.find('ADDRESS.LIST')
+        if address_list is None:
+            mailing_details = ledger_elem.find('LEDMAILINGDETAILS.LIST')
+            if mailing_details is not None:
+                address_list = mailing_details.find('ADDRESS.LIST')
+        
+        if address_list is not None:
+            address_parts = [addr.text for addr in address_list.findall('ADDRESS') if addr.text]
+            address = ", ".join(address_parts)
+            
+        city = ledger_elem.findtext('CITY') or ""
+        state = ledger_elem.findtext('STATENAME') or ""
+        # Check in mailing details if not at root
+        if not state:
+            mailing_details = ledger_elem.find('LEDMAILINGDETAILS.LIST')
+            if mailing_details is not None:
+                state = mailing_details.findtext('STATE') or ""
+        
+        pincode = ledger_elem.findtext('PINCODE') or ""
+        gstin = ledger_elem.findtext('GNPANNO') or ""
+ # Sometimes in GNPANNO or PARTYGSTIN
+        if not gstin:
+            gstin = ledger_elem.findtext('PARTYGSTIN') or ""
 
-        # 3. UPSERT Ledger
-        db_ledger = db.query(Ledger).filter(Ledger.name == name).first()
+        # 4. UPSERT Ledger
+        db_ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == company_id).first()
         if not db_ledger:
-            db_ledger = Ledger(name=name)
+            db_ledger = Ledger(name=name, company_id=company_id)
             db.add(db_ledger)
         
         db_ledger.group_id = group.id
@@ -173,17 +254,22 @@ def sync_ledgers_to_db(db, xml_content=None):
         db_ledger.alterid = int(alterid) if alterid else 0
         db_ledger.opening_balance = Decimal(str(opening_bal))
         db_ledger.is_debit_balance = is_debit
+        db_ledger.address = address
+        db_ledger.city = city
+        db_ledger.state = state
+        db_ledger.pincode = pincode
+        db_ledger.gstin = gstin
         count += 1
 
     db.commit()
     return {"message": f"Successfully synced {count} ledgers from Tally."}
 
-def sync_vouchers_to_db(db, xml_content=None):
+def sync_vouchers_to_db(db, company_id: int, xml_content=None):
     """
     High-level function to sync vouchers from Tally to PostgreSQL.
     Accepts optional xml_content for file-based uploads.
     """
-    from models import Voucher, VoucherEntry, Ledger, VoucherType
+    from .models import Voucher, VoucherEntry, Ledger, VoucherType
     from sqlalchemy.orm import Session
     from decimal import Decimal
     from datetime import datetime
@@ -200,33 +286,43 @@ def sync_vouchers_to_db(db, xml_content=None):
         root = ET.fromstring(xml_content)
     except Exception as e:
         return {"error": f"Invalid XML format: {str(e)}"}
+    
+    logging.info(f"sync_vouchers_to_db started. Company ID: {company_id}. XML size: {len(xml_content)}")
+    all_vouchers = list(root.iter('VOUCHER'))
+    logging.info(f"Found {len(all_vouchers)} VOUCHER elements in XML.")
+    
     count = 0
-    for vch_elem in root.iter('VOUCHER'):
+    for vch_elem in all_vouchers:
         vch_number = vch_elem.findtext('VOUCHERNUMBER')
         guid = vch_elem.findtext('GUID')
+        logging.info(f"Processing voucher: {vch_number} (GUID: {guid})")
         alterid = int(vch_elem.findtext('ALTERID') or 0)
         vch_type_name = vch_elem.findtext('VOUCHERTYPENAME')
         vch_date_str = vch_elem.findtext('DATE') # YYYYMMDD
         narration = vch_elem.findtext('NARRATION')
         
         # Skip if already synced by alterid
-        existing = db.query(Voucher).filter(Voucher.tally_guid == guid).first()
+        existing = db.query(Voucher).filter(Voucher.tally_guid == guid, Voucher.company_id == company_id).first()
         if existing and existing.alterid == alterid:
             continue
             
         # 1. Get Voucher Type
-        vtype = db.query(VoucherType).filter(VoucherType.name == vch_type_name).first()
+        vtype = db.query(VoucherType).filter(VoucherType.name == vch_type_name, VoucherType.company_id == company_id).first()
         if not vtype:
-            vtype = VoucherType(name=vch_type_name)
+            vtype = VoucherType(name=vch_type_name, company_id=company_id)
             db.add(vtype)
             db.flush()
             
         # 2. Parse Date
-        vch_date = datetime.strptime(vch_date_str, "%Y%m%d").date()
+        try:
+            vch_date = datetime.strptime(vch_date_str, "%Y%m%d").date()
+        except (ValueError, TypeError):
+            # Fallback to current date or skip? Let's skip if date is invalid for an import
+            continue
         
         # 3. Create/Update Voucher
         if not existing:
-            existing = Voucher()
+            existing = Voucher(company_id=company_id)
             db.add(existing)
         
         existing.voucher_type_id = vtype.id
@@ -247,31 +343,29 @@ def sync_vouchers_to_db(db, xml_content=None):
             amount_str = ledger_entry.findtext('AMOUNT')
             
             # Find Ledger
-            ledger = db.query(Ledger).filter(Ledger.name == ledger_name).first()
+            ledger = db.query(Ledger).filter(Ledger.name == ledger_name, Ledger.company_id == company_id).first()
             if not ledger:
                 # Create a placeholder ledger if not found
                 # It's better to sync masters first, but this handles partial syncs
-                from models import TallyGroup
-                suspense_group = db.query(TallyGroup).filter(TallyGroup.name == 'Suspense Accounts').first()
+                from .models import TallyGroup
+                suspense_group = db.query(TallyGroup).filter(TallyGroup.name == 'Suspense Accounts', TallyGroup.company_id == company_id).first()
                 if not suspense_group:
-                    suspense_group = TallyGroup(name='Suspense Accounts')
+                    suspense_group = TallyGroup(name='Suspense Accounts', company_id=company_id)
                     db.add(suspense_group)
                     db.flush()
-                ledger = Ledger(name=ledger_name, group_id=suspense_group.id)
+                ledger = Ledger(name=ledger_name, group_id=suspense_group.id, company_id=company_id)
                 db.add(ledger)
                 db.flush()
             
-            try:
-                amt_val = float(amount_str)
-                is_debit = amt_val < 0 # Tally XML: -ve for Debit, +ve for Credit
+            amt_val, is_debit = parse_tally_amount(amount_str)
+            if amt_val != 0:
                 vch_entry = VoucherEntry(
                     voucher_id=existing.id,
                     ledger_id=ledger.id,
-                    amount=Decimal(str(abs(amt_val))),
+                    amount=Decimal(str(amt_val)),
                     is_debit=is_debit
                 )
                 db.add(vch_entry)
-            except: continue
         
         count += 1
         

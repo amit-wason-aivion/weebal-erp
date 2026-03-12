@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Drawer, Form, Input, Select, InputNumber, Switch, Space, Typography, message, Card, Tabs, Modal } from 'antd';
+import { Table, Button, Drawer, Form, Input, Select, InputNumber, Switch, Space, Typography, message, Card, Tabs, Modal, Row, Col, Divider } from 'antd';
 import { PlusOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
@@ -20,6 +20,12 @@ const AccountsInfo = () => {
     const [ledgerForm] = Form.useForm();
     const [groupForm] = Form.useForm();
     const navigate = useNavigate();
+
+    // Watch group selection to show tax/address fields
+    const selectedGroupId = Form.useWatch('group_id', ledgerForm);
+    const selectedGroup = groups.find(g => String(g.id) === String(selectedGroupId));
+    const showTaxDetails = selectedGroup?.name?.toLowerCase().includes('sundry debtors') ||
+        selectedGroup?.name?.toLowerCase().includes('sundry creditors');
 
     useEffect(() => {
         if (activeCompany) {
@@ -124,11 +130,11 @@ const AccountsInfo = () => {
         }
     ];
 
-    const filteredLedgers = ledgers.filter(l => 
+    const filteredLedgers = ledgers.filter(l =>
         l.name.toLowerCase().includes(ledgerSearchText.toLowerCase())
     );
 
-    const filteredGroups = groups.filter(g => 
+    const filteredGroups = groups.filter(g =>
         g.name.toLowerCase().includes(groupSearchText.toLowerCase())
     );
 
@@ -138,9 +144,9 @@ const AccountsInfo = () => {
                 <Title level={4} style={{ margin: 0, color: '#008080' }}>{title} ({count})</Title>
             </Space>
             <Space>
-                <Input 
-                    placeholder={searchPlaceholder} 
-                    prefix={<SearchOutlined />} 
+                <Input
+                    placeholder={searchPlaceholder}
+                    prefix={<SearchOutlined />}
                     onChange={e => onSearchChange(e.target.value)}
                     style={{ width: 250 }}
                 />
@@ -158,10 +164,10 @@ const AccountsInfo = () => {
             children: (
                 <>
                     {renderHeader("Ledgers", filteredLedgers.length, "Search Ledgers...", setLedgerSearchText, () => setLedgerDrawerVisible(true), "Create Ledger")}
-                    <Table 
-                        dataSource={filteredLedgers} 
-                        columns={ledgerColumns} 
-                        rowKey="id" 
+                    <Table
+                        dataSource={filteredLedgers}
+                        columns={ledgerColumns}
+                        rowKey="id"
                         loading={loading}
                         pagination={{ pageSize: 12 }}
                         size="small"
@@ -179,10 +185,10 @@ const AccountsInfo = () => {
             children: (
                 <>
                     {renderHeader("Groups", filteredGroups.length, "Search Groups...", setGroupSearchText, () => setGroupModalVisible(true), "Create Group")}
-                    <Table 
-                        dataSource={filteredGroups} 
-                        columns={groupColumns} 
-                        rowKey="id" 
+                    <Table
+                        dataSource={filteredGroups}
+                        columns={groupColumns}
+                        rowKey="id"
                         loading={loading}
                         pagination={{ pageSize: 12 }}
                         size="small"
@@ -199,10 +205,10 @@ const AccountsInfo = () => {
                 <div style={{ marginBottom: 20 }}>
                     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} type="text">Back to Gateway</Button>
                 </div>
-                
-                <Tabs 
-                    defaultActiveKey="1" 
-                    items={items} 
+
+                <Tabs
+                    defaultActiveKey="1"
+                    items={items}
                     type="card"
                     style={{ marginTop: 10 }}
                 />
@@ -211,7 +217,7 @@ const AccountsInfo = () => {
             {/* Create Ledger Drawer */}
             <Drawer
                 title="Create New Ledger"
-                width={400}
+                width={500}
                 onClose={() => setLedgerDrawerVisible(false)}
                 open={ledgerDrawerVisible}
             >
@@ -229,13 +235,86 @@ const AccountsInfo = () => {
                     <Form.Item label="Opening Balance">
                         <Space>
                             <Form.Item name="opening_balance" noStyle>
-                                <InputNumber min={0} style={{ width: 200 }} precision={2} />
+                                <InputNumber min={0} style={{ width: 300 }} precision={2} />
                             </Form.Item>
                             <Form.Item name="is_debit_balance" valuePropName="checked" noStyle>
                                 <Switch checkedChildren="Dr" unCheckedChildren="Cr" />
                             </Form.Item>
                         </Space>
                     </Form.Item>
+
+                    {showTaxDetails && (
+                        <>
+                            <Divider orientation="left" style={{ borderColor: '#008080' }}>
+                                <Text strong style={{ color: '#008080', fontSize: '12px' }}>TAX & ADDRESS DETAILS</Text>
+                            </Divider>
+
+                            <Form.Item name="address" label="Address">
+                                <Input.TextArea rows={2} placeholder="Full building/street address" />
+                            </Form.Item>
+
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="city" label="City">
+                                        <Input placeholder="City" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item name="state" label="State">
+                                        <Input placeholder="State" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="pincode" label="Pincode">
+                                        <Input placeholder="6-digit ZIP" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="gstin"
+                                        label="GSTIN"
+                                        rules={[
+                                            {
+                                                pattern: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+                                                message: 'Invalid GSTIN format'
+                                            }
+                                        ]}
+                                    >
+                                        <Input placeholder="e.g. 27AAAAA0000A1Z5" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="pan_no" label="PAN No.">
+                                        <Input placeholder="PAN" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item name="drug_license_no" label="Drug License No.">
+                                        <Input placeholder="DL No. (for Pharma)" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="phone" label="Phone No.">
+                                        <Input placeholder="Contact" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Form.Item name="email" label="Email ID" rules={[{ type: 'email', message: 'Invalid email' }]}>
+                                        <Input placeholder="Email" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        </>
+                    )}
 
                     <Form.Item>
                         <Space style={{ width: '100%', justifyContent: 'flex-end' }}>

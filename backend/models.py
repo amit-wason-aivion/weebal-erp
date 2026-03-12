@@ -38,6 +38,17 @@ class Ledger(Base):
     is_debit_balance = Column(Boolean, default=True) # True = Dr, False = Cr
     bill_by_bill_enabled = Column(Boolean, default=False)
     
+    # Billing & Compliance Details
+    address = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    state = Column(String, nullable=True)
+    pincode = Column(String, nullable=True)
+    gstin = Column(String, nullable=True)
+    pan_no = Column(String, nullable=True)
+    drug_license_no = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    
     # Tally Sync Columns
     tally_guid = Column(String, unique=True, index=True)
     alterid = Column(Integer, index=True)
@@ -136,6 +147,29 @@ class StockItem(Base):
     hsn_sac = Column(String, nullable=True)
     gst_rate = Column(Numeric(5, 2), default=0.00) # GST Percentage
     
+    # Pharma Extensions
+    salt_composition = Column(String, nullable=True)
+    rack_number = Column(String, nullable=True)
+    main_unit_name = Column(String, nullable=True) # e.g., Box, Strip
+    sub_unit_name = Column(String, nullable=True)  # e.g., Strip, Tablet
+    conversion_factor = Column(Integer, default=1) # e.g., 10 tablets per strip
+    
+    # Pharma Reporting Fields
+    min_stock_level = Column(Integer, default=0)
+    is_narcotic = Column(Boolean, default=False)
+    is_h1 = Column(Boolean, default=False)
+
+class StockBatch(Base):
+    """
+    Pharma-specific Batch tracking for Stock Items.
+    """
+    __tablename__ = 'stock_batches'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    stock_item_id = Column(Integer, ForeignKey('stock_items.id'), nullable=False)
+    batch_no = Column(String, nullable=False)
+    expiry_date = Column(Date, nullable=False)
+    opening_stock = Column(Numeric(15, 4), default=0.00)
+    
 class InventoryEntry(Base):
     """
     Line items mapping to a voucher for inventory items.
@@ -144,6 +178,7 @@ class InventoryEntry(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     voucher_id = Column(Integer, ForeignKey('vouchers.id'), nullable=False)
     stock_item_id = Column(Integer, ForeignKey('stock_items.id'), nullable=False)
+    batch_id = Column(Integer, ForeignKey('stock_batches.id'), nullable=True) # Pharma: Link to batch
     godown_id = Column(Integer, ForeignKey('godowns.id'), nullable=True)
     
     quantity = Column(Numeric(15, 4), nullable=False)
@@ -159,7 +194,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    role = Column(String, default="user") # 'superadmin', 'admin', 'user'
+    role = Column(String, default="Operator") # 'superadmin', 'Admin', 'Operator', 'Viewer'
     
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=True) # Null for superadmin
     
@@ -181,6 +216,9 @@ class Company(Base):
     pin_code = Column(String, nullable=True)
     telephone = Column(String, nullable=True)
     email = Column(String, nullable=True)
+    gstin = Column(String, nullable=True)
+    drug_license_no = Column(String, nullable=True)
+    company_type = Column(String, default="GENERAL") # 'GENERAL' or 'PHARMA'
     
     financial_year_from = Column(Date, nullable=False)
     books_beginning_from = Column(Date, nullable=False)

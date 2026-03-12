@@ -11,6 +11,20 @@ instance.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        
+        // Automatically attach X-Company-ID if available in localStorage
+        const savedCompany = localStorage.getItem('activeCompany');
+        if (savedCompany && savedCompany !== "undefined") {
+            try {
+                const company = JSON.parse(savedCompany);
+                if (company && company.id) {
+                    config.headers['X-Company-ID'] = company.id;
+                }
+            } catch (e) {
+                console.error("Error parsing activeCompany for header", e);
+            }
+        }
+        
         return config;
     },
     (error) => {

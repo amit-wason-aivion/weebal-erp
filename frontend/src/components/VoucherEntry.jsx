@@ -201,6 +201,9 @@ const VoucherEntry = () => {
         const balanceText = selectedLedger 
             ? `Current Bal: ₹ ${Math.abs(selectedLedger.opening_balance).toLocaleString()} ${selectedLedger.is_debit_balance ? 'Dr' : 'Cr'}`
             : '';
+        const detailText = selectedLedger && (selectedLedger.city || selectedLedger.gstin)
+            ? `${selectedLedger.city ? selectedLedger.city : ''}${selectedLedger.city && selectedLedger.gstin ? ' | ' : ''}${selectedLedger.gstin ? 'GST: ' + selectedLedger.gstin : ''}`
+            : '';
 
         return (
             <div>
@@ -222,7 +225,10 @@ const VoucherEntry = () => {
                 >
                     {ledgers.map(l => <Option key={l.id} value={l.id}>{l.name}</Option>)}
                 </Select>
-                {balanceText && <div style={{ fontSize: '11px', color: '#888', marginTop: '2px', fontStyle: 'italic' }}>{balanceText}</div>}
+                <div style={{ fontSize: '11px', color: '#888', marginTop: '2px', fontStyle: 'italic', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{balanceText}</span>
+                    <span style={{ color: '#008080' }}>{detailText}</span>
+                </div>
             </div>
         );
       }

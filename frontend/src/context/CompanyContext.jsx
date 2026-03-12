@@ -29,7 +29,7 @@ export const CompanyProvider = ({ children }) => {
     };
 
     return (
-        <CompanyContext.Provider value={{ activeCompany, selectCompany, loading }}>
+        <CompanyContext.Provider value={{ activeCompany, selectCompany, loading, companyType: activeCompany?.company_type || 'GENERAL' }}>
             {children}
         </CompanyContext.Provider>
     );

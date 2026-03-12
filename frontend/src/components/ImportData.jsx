@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Button, Space, Typography, message, Divider, List, Tag, Alert, Upload, Row, Col } from 'antd';
 import { SyncOutlined, ArrowLeftOutlined, CloudDownloadOutlined, DatabaseOutlined, InboxOutlined, FileTextOutlined, CloudUploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useCompany } from '../context/CompanyContext';
 import axios from '../api/axios';
 
 const { Title, Text, Paragraph } = Typography;
@@ -10,12 +11,16 @@ const { Dragger } = Upload;
 const ImportData = () => {
     const [syncingMasters, setSyncingMasters] = useState(false);
     const [syncingTransactions, setSyncingTransactions] = useState(false);
+    const [pushingPending, setPushingPending] = useState(false);
     const navigate = useNavigate();
+    const { activeCompany } = useCompany();
 
     const handleSyncMasters = async () => {
         setSyncingMasters(true);
         try {
-            const response = await axios.post('/api/sync/import-ledgers');
+            const response = await axios.post('/api/sync/import-ledgers', {}, {
+                headers: { 'X-Company-ID': activeCompany?.id }
+            });
             message.success(response.data.message || "Masters synced successfully");
         } catch (error) {
             message.error(error.response?.data?.detail || "Failed to sync masters from Tally");
@@ -27,12 +32,28 @@ const ImportData = () => {
     const handleSyncTransactions = async () => {
         setSyncingTransactions(true);
         try {
-            const response = await axios.post('/api/sync/import-vouchers');
+            const response = await axios.post('/api/sync/import-vouchers', {}, {
+                headers: { 'X-Company-ID': activeCompany?.id }
+            });
             message.success(response.data.message || "Transactions synced successfully");
         } catch (error) {
             message.error(error.response?.data?.detail || "Failed to sync transactions from Tally");
         } finally {
             setSyncingTransactions(false);
+        }
+    };
+
+    const handlePushPending = async () => {
+        setPushingPending(true);
+        try {
+            const response = await axios.post('/api/sync/tally/push-pending', {}, {
+                headers: { 'X-Company-ID': activeCompany?.id }
+            });
+            message.success(response.data.message || "Manual push started in background");
+        } catch (error) {
+            message.error(error.response?.data?.detail || "Failed to trigger push to Tally");
+        } finally {
+            setPushingPending(false);
         }
     };
 
@@ -45,7 +66,10 @@ const ImportData = () => {
             formData.append('file', file);
             try {
                 const response = await axios.post('/api/sync/upload-tally-xml', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
+                    headers: { 
+                        'Content-Type': 'multipart/form-data',
+                        'X-Company-ID': activeCompany?.id
+                    }
                 });
                 onSuccess(response.data);
                 message.success(`${file.name} uploaded and synced: ${response.data.ledgers}, ${response.data.transactions}`);
@@ -101,11 +125,18 @@ const ImportData = () => {
             icon: <DatabaseOutlined style={{ fontSize: '24px', color: '#008080' }} />
         },
         {
-            title: 'Transactions (Vouchers)',
+            title: 'Transactions (Import from Tally)',
             description: 'Imports sales, purchases, payments, and other vouchers. Uses AlterID to prevent duplicates.',
             action: handleSyncTransactions,
             loading: syncingTransactions,
             icon: <CloudDownloadOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
+        },
+        {
+            title: 'Push Pending (Local to Tally Sync)',
+            description: 'Pushes all unsynced local vouchers to Tally running on Port 9000.',
+            action: handlePushPending,
+            loading: pushingPending,
+            icon: <SyncOutlined style={{ fontSize: '24px', color: '#8844ee' }} />
         }
     ];
 
@@ -144,11 +175,11 @@ const ImportData = () => {
                                     onClick={item.action} 
                                     loading={item.loading}
                                     style={{ 
-                                        backgroundColor: item.title.includes('Masters') ? '#008080' : '#1890ff',
-                                        borderColor: item.title.includes('Masters') ? '#008080' : '#1890ff' 
+                                        backgroundColor: item.title.includes('Masters') ? '#008080' : item.title.includes('Push') ? '#8844ee' : '#1890ff',
+                                        borderColor: item.title.includes('Masters') ? '#008080' : item.title.includes('Push') ? '#8844ee' : '#1890ff' 
                                     }}
                                 >
-                                    Connect & Sync
+                                    {item.title.includes('Push') ? 'Push to Tally' : 'Connect & Sync'}
                                 </Button>
                             ]}
                         >
@@ -196,7 +227,12 @@ const ImportData = () => {
                             onClick={async () => {
                                 const token = localStorage.getItem('token');
                                 const url = `${axios.defaults.baseURL}/api/sync/export-app-data`;
-                                fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
+                                fetch(url, { 
+                                    headers: { 
+                                        'Authorization': `Bearer ${token}`,
+                                        'X-Company-ID': activeCompany?.id
+                                    } 
+                                })
                                 .then(resp => resp.blob())
                                 .then(blob => {
                                     const url = window.URL.createObjectURL(blob);
@@ -222,7 +258,12 @@ const ImportData = () => {
                             onClick={async () => {
                                 const token = localStorage.getItem('token');
                                 const url = `${axios.defaults.baseURL}/api/sync/export-tally-xml`;
-                                fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
+                                fetch(url, { 
+                                    headers: { 
+                                        'Authorization': `Bearer ${token}`,
+                                        'X-Company-ID': activeCompany?.id
+                                    } 
+                                })
                                 .then(resp => resp.blob())
                                 .then(blob => {
                                     const url = window.URL.createObjectURL(blob);

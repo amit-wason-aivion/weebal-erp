@@ -27,6 +27,7 @@ Open a terminal, navigate to the `backend` folder, activate the virtual environm
 cd backend
 source venv/Scripts/activate  # On Windows Git Bash/PowerShell. Use `venv\Scripts\activate` in CMD.
 uvicorn main:app --reload
+uvicorn backend.main:app --reload
 ```
 *The backend API will run on `http://localhost:8000`.*
 

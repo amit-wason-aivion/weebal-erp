@@ -1,0 +1,556 @@
+
+--- 2026-03-12 08:05:47.875639 ---
+Global Error Catch: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 572, in upload_tally_xml
+    xml_text = content.decode("utf-8")
+               ^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+==================================================
+
+--- 2026-03-12 08:06:12.425017 ---
+Global Error Catch: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 572, in upload_tally_xml
+    xml_text = content.decode("utf-8")
+               ^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+
+==================================================
+
+--- 2026-03-12 08:16:24.103588 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: ParseError: reference to invalid character number: line 1413, column 21
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 593, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=current_user.company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 136, in sync_ledgers_to_db
+    root = ET.fromstring(xml_content)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\xml\etree\ElementTree.py", line 1338, in XML
+    parser.feed(text)
+xml.etree.ElementTree.ParseError: reference to invalid character number: line 1413, column 21
+
+==================================================
+
+--- 2026-03-12 08:23:19.122336 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: ParseError: reference to invalid character number: line 1413, column 21
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 593, in upload_tally_xml
+    # XML 1.0 does not allow control characters in the range [#x00-#x08], [#x0B-#x0C], [#x0E-#x1F]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 136, in sync_ledgers_to_db
+    root = ET.fromstring(xml_content)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\xml\etree\ElementTree.py", line 1338, in XML
+    parser.feed(text)
+xml.etree.ElementTree.ParseError: reference to invalid character number: line 1413, column 21
+
+==================================================
+
+--- 2026-03-12 08:25:34.923379 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (173, Primary, null, null, null, null).
+
+[SQL: INSERT INTO tally_groups (name, parent_id, company_id, tally_guid, alterid) VALUES (%(name)s, %(parent_id)s, %(company_id)s, %(tally_guid)s, %(alterid)s) RETURNING tally_groups.id]
+[parameters: {'name': 'Primary', 'parent_id': None, 'company_id': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (173, Primary, null, null, null, null).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 602, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=current_user.company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 153, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (173, Primary, null, null, null, null).
+
+[SQL: INSERT INTO tally_groups (name, parent_id, company_id, tally_guid, alterid) VALUES (%(name)s, %(parent_id)s, %(company_id)s, %(tally_guid)s, %(alterid)s) RETURNING tally_groups.id]
+[parameters: {'name': 'Primary', 'parent_id': None, 'company_id': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-12 08:25:53.737311 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (174, Primary, null, null, null, null).
+
+[SQL: INSERT INTO tally_groups (name, parent_id, company_id, tally_guid, alterid) VALUES (%(name)s, %(parent_id)s, %(company_id)s, %(tally_guid)s, %(alterid)s) RETURNING tally_groups.id]
+[parameters: {'name': 'Primary', 'parent_id': None, 'company_id': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (174, Primary, null, null, null, null).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 602, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=current_user.company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 153, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (174, Primary, null, null, null, null).
+
+[SQL: INSERT INTO tally_groups (name, parent_id, company_id, tally_guid, alterid) VALUES (%(name)s, %(parent_id)s, %(company_id)s, %(tally_guid)s, %(alterid)s) RETURNING tally_groups.id]
+[parameters: {'name': 'Primary', 'parent_id': None, 'company_id': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-12 08:26:32.630376 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (175, Primary, null, null, null, null).
+
+[SQL: INSERT INTO tally_groups (name, parent_id, company_id, tally_guid, alterid) VALUES (%(name)s, %(parent_id)s, %(company_id)s, %(tally_guid)s, %(alterid)s) RETURNING tally_groups.id]
+[parameters: {'name': 'Primary', 'parent_id': None, 'company_id': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (175, Primary, null, null, null, null).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 602, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=current_user.company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 153, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "tally_groups" violates not-null constraint
+DETAIL:  Failing row contains (175, Primary, null, null, null, null).
+
+[SQL: INSERT INTO tally_groups (name, parent_id, company_id, tally_guid, alterid) VALUES (%(name)s, %(parent_id)s, %(company_id)s, %(tally_guid)s, %(alterid)s) RETURNING tally_groups.id]
+[parameters: {'name': 'Primary', 'parent_id': None, 'company_id': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+DEBUG 2026-03-12 09:04:29.492163 - GET /api/groups | headers: {'host': 'localhost:8000', 'connection': 'keep-alive', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluIiwiZXhwIjoxNzczMjg3MDkyfQ.FIYednObDkgeMJKG96SgtxFfOTun0h75fhJX9KUDBs4', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'accept': 'application/json, text/plain, */*', 'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"', 'sec-ch-ua-mobile': '?0', 'origin': 'http://localhost:5173', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:5173/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-GB,en;q=0.9'}
+DEBUG 2026-03-12 09:04:29.499924 - GET /api/ledgers | headers: {'host': 'localhost:8000', 'connection': 'keep-alive', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluIiwiZXhwIjoxNzczMjg3MDkyfQ.FIYednObDkgeMJKG96SgtxFfOTun0h75fhJX9KUDBs4', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'accept': 'application/json, text/plain, */*', 'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"', 'sec-ch-ua-mobile': '?0', 'origin': 'http://localhost:5173', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:5173/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-GB,en;q=0.9'}
+DEBUG 2026-03-12 09:04:40.569796 - GET /api/ledgers/17/vouchers | headers: {'host': 'localhost:8000', 'connection': 'keep-alive', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluIiwiZXhwIjoxNzczMjg3MDkyfQ.FIYednObDkgeMJKG96SgtxFfOTun0h75fhJX9KUDBs4', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'accept': 'application/json, text/plain, */*', 'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"', 'sec-ch-ua-mobile': '?0', 'origin': 'http://localhost:5173', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:5173/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-GB,en;q=0.9'}
+DEBUG 2026-03-12 09:04:40.583123 - GET /api/ledgers/17/vouchers | headers: {'host': 'localhost:8000', 'connection': 'keep-alive', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcmFkbWluIiwiZXhwIjoxNzczMjg3MDkyfQ.FIYednObDkgeMJKG96SgtxFfOTun0h75fhJX9KUDBs4', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'accept': 'application/json, text/plain, */*', 'sec-ch-ua': '"Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"', 'sec-ch-ua-mobile': '?0', 'origin': 'http://localhost:5173', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:5173/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-GB,en;q=0.9'}

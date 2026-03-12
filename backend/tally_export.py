@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from models import Ledger, Voucher, VoucherEntry, VoucherType, TallyGroup, StockItem, UnitOfMeasure
 from datetime import datetime
 
-def generate_bulk_tally_xml(db: Session):
+def generate_bulk_tally_xml(db: Session, company_id: int):
     """
-    Generates a single Tally-compliant XML file containing all Masters and Vouchers.
+    Generates a single Tally-compliant XML file containing all Masters and Vouchers for a specific company.
     """
     root = ET.Element("ENVELOPE")
     
@@ -21,7 +21,7 @@ def generate_bulk_tally_xml(db: Session):
     request_data = ET.SubElement(import_data, "REQUESTDATA")
 
     # 1. Export Groups
-    groups = db.query(TallyGroup).all()
+    groups = db.query(TallyGroup).filter(TallyGroup.company_id == company_id).all()
     for group in groups:
         tm = ET.SubElement(request_data, "TALLYMESSAGE", {"xmlns:UDF": "TallyUDF"})
         grp = ET.SubElement(tm, "GROUP", {"NAME": group.name, "ACTION": "Create"})
@@ -32,7 +32,7 @@ def generate_bulk_tally_xml(db: Session):
                 ET.SubElement(grp, "PARENT").text = parent.name
 
     # 2. Export Ledgers
-    ledgers = db.query(Ledger).all()
+    ledgers = db.query(Ledger).filter(Ledger.company_id == company_id).all()
     for ledger in ledgers:
         tm = ET.SubElement(request_data, "TALLYMESSAGE", {"xmlns:UDF": "TallyUDF"})
         led = ET.SubElement(tm, "LEDGER", {"NAME": ledger.name, "ACTION": "Create"})
@@ -45,7 +45,7 @@ def generate_bulk_tally_xml(db: Session):
         ET.SubElement(led, "ISBILLWISEON").text = "No"
 
     # 3. Export Stock Items
-    stock_items = db.query(StockItem).all()
+    stock_items = db.query(StockItem).filter(StockItem.company_id == company_id).all()
     for item in stock_items:
         tm = ET.SubElement(request_data, "TALLYMESSAGE", {"xmlns:UDF": "TallyUDF"})
         si = ET.SubElement(tm, "STOCKITEM", {"NAME": item.name, "ACTION": "Create"})
@@ -57,7 +57,7 @@ def generate_bulk_tally_xml(db: Session):
         ET.SubElement(si, "GSTDETAILS.LIST") # Placeholder for GST compliance
 
     # 4. Export Vouchers
-    vouchers = db.query(Voucher).all()
+    vouchers = db.query(Voucher).filter(Voucher.company_id == company_id).all()
     for voucher in vouchers:
         vtype = db.query(VoucherType).filter(VoucherType.id == voucher.voucher_type_id).first()
         vtype_name = vtype.name if vtype else "Journal"

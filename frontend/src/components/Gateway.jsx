@@ -17,7 +17,7 @@ const Gateway = () => {
 
   // RBAC Flags
   const isSuper = role === 'superadmin';
-  const isAdmin = role === 'admin';
+  const isAdmin = role === 'Admin';
   const canManageMasters = permissions.masters || isSuper || isAdmin;
   const canManageVouchers = permissions.vouchers || isSuper || isAdmin;
   const canManageInventory = permissions.inventory || isSuper || isAdmin;
@@ -44,6 +44,7 @@ const Gateway = () => {
       if (key === 'u' && (isAdmin || isSuper)) navigate('/users');
       if (key === 'o' && isAdmin) navigate('/import-data'); 
       if (key === 'r' && canViewReports) navigate('/ratio-analysis'); 
+      if (key === 'h' && canViewReports && activeCompany?.company_type === 'PHARMA') navigate('/pharma-reports');
       if (key === 'n') message.info('Banking module coming in Version 2.0'); 
       if (key === 'q' || key === 'l') {
         localStorage.clear();
@@ -250,9 +251,8 @@ const Gateway = () => {
                 </>
               )}
               
-              <MenuSectionHeading title="Import" />
-              {isAdmin && <MenuItem label="Import of Data" hotkeyChar="O" onClick={() => navigate('/import-data')} />}
-              {(isAdmin || isSuper) && <MenuItem label="User Management" hotkeyChar="U" onClick={() => navigate('/users')} />}
+              <MenuSectionHeading title="Data Sync" />
+              {(isAdmin || isSuper) && <MenuItem label="Tally Import" hotkeyChar="O" onClick={() => navigate('/import-data')} />}
               <MenuItem label="Banking" hotkeyChar="N" onClick={() => message.info('Banking module coming in Version 2.0')} />
               
               <MenuSectionHeading title="Reports" />
@@ -262,11 +262,17 @@ const Gateway = () => {
                   <MenuItem label="Profit & Loss A/c" hotkeyChar="P" onClick={() => navigate('/pnl')} />
                   <MenuItem label="Trial Balance" hotkeyChar="T" onClick={() => navigate('/trial')} />
                   <MenuItem label="Ratio Analysis" hotkeyChar="R" onClick={() => navigate('/ratio-analysis')} />
+                  {activeCompany?.company_type === 'PHARMA' && (
+                    <MenuItem label="Pharma Reports" hotkeyChar="H" onClick={() => navigate('/pharma-reports')} />
+                  )}
                 </>
               )}
               
               <MenuSectionHeading title="Display" />
               {canViewReports && <MenuItem label="Day Book" hotkeyChar="D" onClick={() => navigate('/daybook')} />}
+              
+              <MenuSectionHeading title="Administration" />
+              {(isAdmin || isSuper) && <MenuItem label="User Management" hotkeyChar="U" onClick={() => navigate('/users')} />}
               
               <div style={{ marginTop: '10px' }}>
                 <MenuItem label="Logout" hotkeyChar="L" onClick={() => {
