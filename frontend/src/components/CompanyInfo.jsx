@@ -122,7 +122,7 @@ const CompanyInfo = () => {
     return (
         <div style={{ padding: '20px 50px', backgroundColor: theme.bg, minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '500px' }}>
-                <Space style={{ marginBottom: '20px' }}>
+                <Space style={{ marginBottom: '20px' }} align="center">
                     <Button icon={<ArrowLeftOutlined />} onClick={() => {
                         if (menu === 'main') navigate('/');
                         else {
@@ -131,6 +131,7 @@ const CompanyInfo = () => {
                             form.resetFields();
                         }
                     }} type="text" />
+                    <img src="/logo.png" alt="" style={{ height: '32px', marginRight: '8px' }} />
                     <Title level={3} style={{ margin: 0, color: theme.teal }}>Company Info</Title>
                 </Space>
 

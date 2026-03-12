@@ -21,6 +21,7 @@ import RatioAnalysis from './components/RatioAnalysis';
 import CompanyInfo from './components/CompanyInfo';
 import UserManagement from './components/UserManagement';
 import PharmaReports from './components/PharmaReports';
+import Banking from './components/Banking';
 import { CompanyProvider } from './context/CompanyContext';
 import 'antd/dist/reset.css'; // Ant Design basic reset
 
@@ -102,6 +103,8 @@ function AppContent() {
           <Route path="/pnl" element={<ProtectedRoute><PnL /></ProtectedRoute>} />
           <Route path="/bs" element={<ProtectedRoute><BalanceSheet /></ProtectedRoute>} />
           <Route path="/daybook" element={<ProtectedRoute><DayBook /></ProtectedRoute>} />
+          <Route path="/banking" element={<ProtectedRoute><Banking /></ProtectedRoute>} />
+          <Route path="/ledger-vouchers/:id" element={<ProtectedRoute><LedgerVouchers /></ProtectedRoute>} />
           <Route path="/ledger-vouchers/:id" element={<ProtectedRoute><LedgerVouchers /></ProtectedRoute>} />
           <Route path="/purchase" element={<ProtectedRoute><PurchaseInvoice /></ProtectedRoute>} />
           <Route path="/purchase/:id" element={<ProtectedRoute><PurchaseInvoice /></ProtectedRoute>} />

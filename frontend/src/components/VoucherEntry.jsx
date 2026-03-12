@@ -20,8 +20,8 @@ const VoucherEntry = () => {
   const [form] = Form.useForm();
   const [ledgers, setLedgers] = useState([]);
   const [entries, setEntries] = useState([
-    { key: 0, ledger_id: null, is_debit: true, amount: null },
-    { key: 1, ledger_id: null, is_debit: false, amount: null }
+    { key: 0, ledger_id: null, is_debit: true, amount: null, instrument_no: '', instrument_date: null },
+    { key: 1, ledger_id: null, is_debit: false, amount: null, instrument_no: '', instrument_date: null }
   ]);
   const [voucherType, setVoucherType] = useState('1'); 
   const navigate = useNavigate();
@@ -111,7 +111,9 @@ const VoucherEntry = () => {
         key: newKey, 
         ledger_id: null, 
         is_debit: nextIsDebit, 
-        amount: diff > 0 ? diff : null 
+        amount: diff > 0 ? diff : null,
+        instrument_no: '',
+        instrument_date: null
     });
     setEntries(newEntries);
 
@@ -144,7 +146,9 @@ const VoucherEntry = () => {
       entries: validEntries.map(e => ({
         ledger_id: e.ledger_id,
         amount: parseFloat(e.amount),
-        is_debit: e.is_debit
+        is_debit: e.is_debit,
+        instrument_no: e.instrument_no,
+        instrument_date: e.instrument_date
       }))
     };
 
@@ -160,8 +164,8 @@ const VoucherEntry = () => {
       } else {
         form.resetFields();
         setEntries([
-          { key: 0, ledger_id: null, is_debit: true, amount: null },
-          { key: 1, ledger_id: null, is_debit: false, amount: null }
+          { key: 0, ledger_id: null, is_debit: true, amount: null, instrument_no: '', instrument_date: null },
+          { key: 1, ledger_id: null, is_debit: false, amount: null, instrument_no: '', instrument_date: null }
         ]);
       }
     } catch (err) {
@@ -234,6 +238,42 @@ const VoucherEntry = () => {
       }
     },
     {
+      "title": 'Inst. No',
+      "dataIndex": 'instrument_no',
+      "width": '10%',
+      "render": (text, record) => {
+        const selectedLedger = ledgers.find(l => l.id === record.ledger_id);
+        const isBank = selectedLedger?.group_name === 'Bank Accounts';
+        return (
+          <Input 
+            value={record.instrument_no} 
+            onChange={(e) => handleEntryChange(record.key, 'instrument_no', e.target.value)}
+            size="small"
+            disabled={!isBank}
+            placeholder={isBank ? "Chq No" : ""}
+          />
+        );
+      }
+    },
+    {
+      "title": 'Inst. Date',
+      "dataIndex": 'instrument_date',
+      "width": '12%',
+      "render": (text, record) => {
+        const selectedLedger = ledgers.find(l => l.id === record.ledger_id);
+        const isBank = selectedLedger?.group_name === 'Bank Accounts';
+        return (
+          <DatePicker 
+            value={record.instrument_date ? dayjs(record.instrument_date) : null}
+            onChange={(date, dateStr) => handleEntryChange(record.key, 'instrument_date', dateStr)}
+            size="small"
+            style={{ width: '100%' }}
+            disabled={!isBank}
+          />
+        );
+      }
+    },
+    {
       title: 'Debit Amount',
       dataIndex: 'debit_amount',
       width: '20%',
@@ -291,8 +331,11 @@ const VoucherEntry = () => {
 
   return (
     <div style={{ height: '100%', padding: '20px', backgroundColor: '#fdfadd', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', backgroundColor: '#002140', color: 'white', padding: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-        <Title level={4} style={{ color: 'white', margin: 0 }}>Voucher {id ? 'Alteration' : 'Creation'}</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', backgroundColor: '#002140', color: 'white', padding: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.png" alt="WEEBAL Logo" style={{ height: '30px', marginRight: '15px', filter: 'brightness(0) invert(1)' }} />
+          <Title level={4} style={{ color: 'white', margin: 0 }}>Voucher {id ? 'Alteration' : 'Creation'}</Title>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ backgroundColor: '#008080', padding: '2px 10px', marginRight: '20px', fontSize: '13px', fontWeight: 'bold' }}>
             Type: {VOUCHER_TYPE_NAMES[voucherType] || 'Journal'}

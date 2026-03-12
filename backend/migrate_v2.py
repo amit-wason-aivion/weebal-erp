@@ -13,7 +13,12 @@ def migrate():
         try:
             conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS company_type VARCHAR DEFAULT 'GENERAL'"))
             conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS fssai_no VARCHAR"))
-            print("Verified: companies.company_type and fssai_no")
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS enable_bill_by_bill BOOLEAN DEFAULT FALSE"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS maintain_stock_batches BOOLEAN DEFAULT FALSE"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS enable_gst BOOLEAN DEFAULT TRUE"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS enable_tds BOOLEAN DEFAULT FALSE"))
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS enable_cost_centres BOOLEAN DEFAULT FALSE"))
+            print("Verified: companies branding and F11 features")
         except Exception as e:
             print(f"Skipping companies.company_type: {e}")
 
@@ -78,6 +83,15 @@ def migrate():
             print("Verified: advanced payroll fields and salary_history table")
         except Exception as e:
             print(f"Skipping ledgers fields: {e}")
+
+        # 5. Add Banking fields to voucher_entries
+        try:
+            conn.execute(text("ALTER TABLE voucher_entries ADD COLUMN IF NOT EXISTS instrument_no VARCHAR"))
+            conn.execute(text("ALTER TABLE voucher_entries ADD COLUMN IF NOT EXISTS instrument_date DATE"))
+            conn.execute(text("ALTER TABLE voucher_entries ADD COLUMN IF NOT EXISTS bank_date DATE"))
+            print("Verified: voucher_entries banking fields")
+        except Exception as e:
+            print(f"Skipping voucher_entries banking fields: {e}")
 
         conn.commit()
     

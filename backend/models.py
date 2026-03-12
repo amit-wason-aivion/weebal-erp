@@ -147,6 +147,11 @@ class VoucherEntry(Base):
     amount = Column(Numeric(15, 4), nullable=False)
     is_debit = Column(Boolean, nullable=False) # True = Dr, False = Cr
     
+    # Banking Details
+    instrument_no = Column(String, nullable=True)
+    instrument_date = Column(Date, nullable=True)
+    bank_date = Column(Date, nullable=True) # Cleared Date for Reconciliation
+    
     # Relationships
     voucher = relationship("Voucher", back_populates="entries")
     ledger = relationship("Ledger", back_populates="entries")
@@ -259,4 +264,11 @@ class Company(Base):
     
     financial_year_from = Column(Date, nullable=False)
     books_beginning_from = Column(Date, nullable=False)
+    
+    # Feature Flags (F11)
+    enable_bill_by_bill = Column(Boolean, default=False)
+    maintain_stock_batches = Column(Boolean, default=False)
+    enable_gst = Column(Boolean, default=True)
+    enable_tds = Column(Boolean, default=False)
+    enable_cost_centres = Column(Boolean, default=False)
 

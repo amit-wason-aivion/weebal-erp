@@ -96,6 +96,9 @@ class VoucherEntrySchema(BaseModel):
     ledger_id: int
     amount: float
     is_debit: bool
+    instrument_no: Optional[str] = None
+    instrument_date: Optional[date] = None
+    bank_date: Optional[date] = None
 
 class VoucherSchema(BaseModel):
     voucher_type_id: int
@@ -125,6 +128,8 @@ class LedgerCreateSchema(BaseModel):
     employee_id: Optional[str] = None
     designation: Optional[str] = None
     bank_name: Optional[str] = None
+    account_no: Optional[str] = None
+    ifsc_code: Optional[str] = None
     primary_pan: Optional[str] = None
     basic_pay: Optional[float] = 0.0
     da_pay: Optional[float] = 0.0
@@ -182,6 +187,11 @@ class CompanyCreateSchema(BaseModel):
     company_type: Optional[str] = "GENERAL"
     financial_year_from: date
     books_beginning_from: date
+    enable_bill_by_bill: Optional[bool] = False
+    maintain_stock_batches: Optional[bool] = False
+    enable_gst: Optional[bool] = True
+    enable_tds: Optional[bool] = False
+    enable_cost_centres: Optional[bool] = False
 
 class GroupCreateSchema(BaseModel):
     name: str
@@ -195,6 +205,9 @@ class UOMCreateSchema(BaseModel):
 
 class CompanySplitSchema(BaseModel):
     new_financial_year_start: date
+
+class BulkReconcileSchema(BaseModel):
+    items: List[dict] # list of {entry_id, bank_date}
 
 class UserCreateSchema(BaseModel):
     username: str
@@ -294,7 +307,12 @@ def get_companies(db: Session = Depends(get_db), current_user: User = Depends(ge
             "fssai_no": c.fssai_no,
             "company_type": c.company_type,
             "financial_year_from": c.financial_year_from,
-            "books_beginning_from": c.books_beginning_from
+            "books_beginning_from": c.books_beginning_from,
+            "enable_bill_by_bill": c.enable_bill_by_bill,
+            "maintain_stock_batches": c.maintain_stock_batches,
+            "enable_gst": c.enable_gst,
+            "enable_tds": c.enable_tds,
+            "enable_cost_centres": c.enable_cost_centres
         })
     return result
 
@@ -414,6 +432,60 @@ def split_company(company_id: int, split_data: CompanySplitSchema, db: Session =
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Split failed: {str(e)}")
+
+@app.get("/api/banking/bank-ledgers")
+def get_bank_ledgers(db: Session = Depends(get_db), company_id: int = Depends(get_current_company)):
+    """Returns all ledgers under 'Bank Accounts' group."""
+    from .models import TallyGroup
+    bank_group = db.query(TallyGroup).filter(TallyGroup.name == 'Bank Accounts', TallyGroup.company_id == company_id).first()
+    if not bank_group:
+        return []
+    
+    ledgers = db.query(Ledger).filter(Ledger.group_id == bank_group.id, Ledger.company_id == company_id).all()
+    return [{"id": l.id, "name": l.name, "opening_balance": float(l.opening_balance)} for l in ledgers]
+
+@app.get("/api/banking/reconciliation/{ledger_id}")
+def get_reconciliation_data(ledger_id: int, include_cleared: bool = False, db: Session = Depends(get_db), company_id: int = Depends(get_current_company)):
+    """Returns voucher entries for a specific bank ledger for reconciliation."""
+    query = db.query(VoucherEntry, Voucher).join(Voucher).filter(
+        VoucherEntry.ledger_id == ledger_id,
+        Voucher.company_id == company_id
+    )
+    
+    if not include_cleared:
+        query = query.filter(VoucherEntry.bank_date == None)
+        
+    entries = query.all()
+    
+    result = []
+    for entry, voucher in entries:
+        result.append({
+            "id": entry.id,
+            "date": voucher.date,
+            "voucher_number": voucher.voucher_number,
+            "amount": float(entry.amount),
+            "is_debit": entry.is_debit,
+            "instrument_no": entry.instrument_no,
+            "instrument_date": entry.instrument_date,
+            "bank_date": entry.bank_date,
+            "narration": voucher.narration
+        })
+    return result
+
+@app.post("/api/banking/reconcile")
+def reconcile_vouchers(data: BulkReconcileSchema, db: Session = Depends(get_db)):
+    """Bulk update bank cleared dates for reconciliation."""
+    for item in data.items:
+        entry_id = item.get("id")
+        bank_date_str = item.get("bank_date")
+        
+        if entry_id and bank_date_str:
+            entry = db.query(VoucherEntry).filter(VoucherEntry.id == entry_id).first()
+            if entry:
+                entry.bank_date = date.fromisoformat(bank_date_str)
+    
+    db.commit()
+    return {"message": "Reconciliation updated successfully"}
 
 # --- User Management APIs (Admin Only) ---
 
