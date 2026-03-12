@@ -239,9 +239,22 @@ def sync_ledgers_to_db(db, company_id: int, xml_content=None):
         
         pincode = ledger_elem.findtext('PINCODE') or ""
         gstin = ledger_elem.findtext('GNPANNO') or ""
- # Sometimes in GNPANNO or PARTYGSTIN
+        # Sometimes in GNPANNO or PARTYGSTIN
         if not gstin:
             gstin = ledger_elem.findtext('PARTYGSTIN') or ""
+        
+        # New: Phone, Email, PAN/Income Tax No
+        phone = ledger_elem.findtext('PHONENUMBER') or ""
+        email = ledger_elem.findtext('EMAIL') or ""
+        pan_no = ledger_elem.findtext('INCOMETAXNUMBER') or ""
+        drug_license = ledger_elem.findtext('DRUGLICENSENO') or ""
+        
+        # If not at root, check mailing details
+        if not (phone and email):
+            mailing_details = ledger_elem.find('LEDMAILINGDETAILS.LIST')
+            if mailing_details is not None:
+                if not phone: phone = mailing_details.findtext('PHONENUMBER') or ""
+                if not email: email = mailing_details.findtext('EMAIL') or ""
 
         # 4. UPSERT Ledger
         db_ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == company_id).first()
@@ -259,6 +272,10 @@ def sync_ledgers_to_db(db, company_id: int, xml_content=None):
         db_ledger.state = state
         db_ledger.pincode = pincode
         db_ledger.gstin = gstin
+        db_ledger.phone = phone
+        db_ledger.email = email
+        db_ledger.pan_no = pan_no
+        db_ledger.drug_license_no = drug_license
         count += 1
 
     db.commit()

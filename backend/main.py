@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from typing import List
 
-from .models import Base, Ledger, TallyGroup, Voucher, VoucherEntry, User, Company
+from .models import Base, Ledger, TallyGroup, Voucher, VoucherEntry, User, Company, SalaryHistory
 from .accounting import AccountingEngine
 from pydantic import BaseModel
 from datetime import date
@@ -116,8 +116,39 @@ class LedgerCreateSchema(BaseModel):
     gstin: Optional[str] = None
     pan_no: Optional[str] = None
     drug_license_no: Optional[str] = None
+    fssai_no: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
+    tax_type: Optional[str] = None
+    tax_percentage: Optional[float] = None
+    tax_head: Optional[str] = None
+    employee_id: Optional[str] = None
+    designation: Optional[str] = None
+    bank_name: Optional[str] = None
+    primary_pan: Optional[str] = None
+    basic_pay: Optional[float] = 0.0
+    da_pay: Optional[float] = 0.0
+    hra_pay: Optional[float] = 0.0
+    other_allowances: Optional[float] = 0.0
+    total_ctc: Optional[float] = 0.0
+    monitoring_enabled: Optional[bool] = False
+    attendance_source: Optional[str] = None
+    shift_type: Optional[str] = None
+
+class SalaryHistorySchema(BaseModel):
+    id: int
+    ledger_id: int
+    effective_date: date
+    old_salary: float
+    new_salary: float
+    change_percentage: Optional[float] = None
+
+    class Config:
+        from_attributes = True
+
+class SalaryRevisionSchema(BaseModel):
+    effective_date: date
+    new_salary: float
 
 class StockItemCreateSchema(BaseModel):
     name: str
@@ -147,6 +178,7 @@ class CompanyCreateSchema(BaseModel):
     email: Optional[str] = None
     gstin: Optional[str] = None
     drug_license_no: Optional[str] = None
+    fssai_no: Optional[str] = None
     company_type: Optional[str] = "GENERAL"
     financial_year_from: date
     books_beginning_from: date
@@ -259,6 +291,7 @@ def get_companies(db: Session = Depends(get_db), current_user: User = Depends(ge
             "email": c.email,
             "gstin": c.gstin,
             "drug_license_no": c.drug_license_no,
+            "fssai_no": c.fssai_no,
             "company_type": c.company_type,
             "financial_year_from": c.financial_year_from,
             "books_beginning_from": c.books_beginning_from
@@ -475,8 +508,26 @@ def get_ledgers(db: Session = Depends(get_db), company_id: int = Depends(get_cur
             "gstin": l.gstin,
             "pan_no": l.pan_no,
             "drug_license_no": l.drug_license_no,
+            "fssai_no": l.fssai_no,
             "phone": l.phone,
-            "email": l.email
+            "email": l.email,
+            "tax_type": l.tax_type,
+            "tax_percentage": float(l.tax_percentage) if l.tax_percentage else None,
+            "tax_head": l.tax_head,
+            "employee_id": l.employee_id,
+            "designation": l.designation,
+            "bank_name": l.bank_name,
+            "account_no": l.account_no,
+            "ifsc_code": l.ifsc_code,
+            "primary_pan": l.primary_pan,
+            "basic_pay": float(l.basic_pay),
+            "da_pay": float(l.da_pay),
+            "hra_pay": float(l.hra_pay),
+            "other_allowances": float(l.other_allowances),
+            "total_ctc": float(l.total_ctc),
+            "monitoring_enabled": l.monitoring_enabled,
+            "attendance_source": l.attendance_source,
+            "shift_type": l.shift_type
         })
     return result
 
@@ -503,14 +554,118 @@ def create_ledger(ledger: LedgerCreateSchema, db: Session = Depends(get_db), cur
         gstin=ledger.gstin,
         pan_no=ledger.pan_no,
         drug_license_no=ledger.drug_license_no,
+        fssai_no=ledger.fssai_no,
         phone=ledger.phone,
-        email=ledger.email
+        email=ledger.email,
+        tax_type=ledger.tax_type,
+        tax_percentage=Decimal(str(ledger.tax_percentage)) if ledger.tax_percentage else None,
+        tax_head=ledger.tax_head,
+        employee_id=ledger.employee_id,
+        designation=ledger.designation,
+        bank_name=ledger.bank_name,
+        account_no=ledger.account_no,
+        ifsc_code=ledger.ifsc_code,
+        primary_pan=ledger.primary_pan,
+        basic_pay=Decimal(str(ledger.basic_pay)) if ledger.basic_pay else 0,
+        da_pay=Decimal(str(ledger.da_pay)) if ledger.da_pay else 0,
+        hra_pay=Decimal(str(ledger.hra_pay)) if ledger.hra_pay else 0,
+        other_allowances=Decimal(str(ledger.other_allowances)) if ledger.other_allowances else 0,
+        total_ctc=Decimal(str(ledger.total_ctc)) if ledger.total_ctc else 0,
+        monitoring_enabled=ledger.monitoring_enabled,
+        attendance_source=ledger.attendance_source,
+        shift_type=ledger.shift_type
     )
     db.add(new_ledger)
     db.commit()
     db.refresh(new_ledger)
     
     return new_ledger
+
+@app.put("/api/ledgers/{ledger_id}")
+def update_ledger(ledger_id: int, ledger_data: LedgerCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), company_id: int = Depends(get_current_company)):
+    """Updates an existing ledger."""
+    if not current_user.can_manage_masters:
+        raise HTTPException(status_code=403, detail="Permission denied to manage masters")
+    
+    db_ledger = db.query(Ledger).filter(Ledger.id == ledger_id, Ledger.company_id == company_id).first()
+    if not db_ledger:
+        raise HTTPException(status_code=404, detail="Ledger not found")
+    
+    # Check if name is being changed to an existing ledger name
+    if ledger_data.name != db_ledger.name:
+        existing = db.query(Ledger).filter(Ledger.name == ledger_data.name, Ledger.company_id == company_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Another ledger with this name already exists")
+    
+    # Update fields
+    db_ledger.name = ledger_data.name
+    db_ledger.group_id = ledger_data.group_id
+    db_ledger.opening_balance = Decimal(str(ledger_data.opening_balance))
+    db_ledger.is_debit_balance = ledger_data.is_debit_balance
+    db_ledger.address = ledger_data.address
+    db_ledger.city = ledger_data.city
+    db_ledger.state = ledger_data.state
+    db_ledger.pincode = ledger_data.pincode
+    db_ledger.gstin = ledger_data.gstin
+    db_ledger.pan_no = ledger_data.pan_no
+    db_ledger.drug_license_no = ledger_data.drug_license_no
+    db_ledger.fssai_no = ledger_data.fssai_no
+    db_ledger.phone = ledger_data.phone
+    db_ledger.email = ledger_data.email
+    db_ledger.tax_type = ledger_data.tax_type
+    db_ledger.tax_percentage = Decimal(str(ledger_data.tax_percentage)) if ledger_data.tax_percentage else None
+    db_ledger.tax_head = ledger_data.tax_head
+    db_ledger.employee_id = ledger_data.employee_id
+    db_ledger.designation = ledger_data.designation
+    db_ledger.bank_name = ledger_data.bank_name
+    db_ledger.account_no = ledger_data.account_no
+    db_ledger.ifsc_code = ledger_data.ifsc_code
+    db_ledger.primary_pan = ledger_data.primary_pan
+    db_ledger.basic_pay = Decimal(str(ledger_data.basic_pay)) if ledger_data.basic_pay else 0
+    db_ledger.da_pay = Decimal(str(ledger_data.da_pay)) if ledger_data.da_pay else 0
+    db_ledger.hra_pay = Decimal(str(ledger_data.hra_pay)) if ledger_data.hra_pay else 0
+    db_ledger.other_allowances = Decimal(str(ledger_data.other_allowances)) if ledger_data.other_allowances else 0
+    db_ledger.total_ctc = Decimal(str(ledger_data.total_ctc)) if ledger_data.total_ctc else 0
+    db_ledger.monitoring_enabled = ledger_data.monitoring_enabled
+    db_ledger.attendance_source = ledger_data.attendance_source
+    db_ledger.shift_type = ledger_data.shift_type
+    
+    db.commit()
+    db.refresh(db_ledger)
+    return db_ledger
+
+@app.get("/api/ledgers/{ledger_id}/salary-history")
+def get_salary_history(ledger_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    history = db.query(SalaryHistory).filter(SalaryHistory.ledger_id == ledger_id).order_by(SalaryHistory.effective_date.desc()).all()
+    return history
+
+@app.post("/api/ledgers/{ledger_id}/salary-history")
+def add_salary_revision(ledger_id: int, revision: SalaryRevisionSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    ledger = db.query(Ledger).filter(Ledger.id == ledger_id).first()
+    if not ledger:
+        return {"error": "Ledger not found"}, 404
+    
+    old_salary = float(ledger.total_ctc)
+    new_salary = float(revision.new_salary)
+    
+    change_pct = 0
+    if old_salary > 0:
+        change_pct = ((new_salary - old_salary) / old_salary) * 100
+    
+    new_history = SalaryHistory(
+        ledger_id=ledger_id,
+        effective_date=revision.effective_date,
+        old_salary=old_salary,
+        new_salary=new_salary,
+        change_percentage=change_pct
+    )
+    
+    # Update ledger's total CTC
+    ledger.total_ctc = Decimal(str(new_salary))
+    
+    db.add(new_history)
+    db.commit()
+    return {"message": "Salary revision added successfully"}
 
 @app.get("/api/groups")
 def get_groups(db: Session = Depends(get_db), company_id: int = Depends(get_current_company)):
@@ -611,9 +766,12 @@ async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(g
 def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(check_admin_access), company_id: int = Depends(get_current_company)):
     """Exports all master and transaction data to a JSON backup."""
     
-    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure
+    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company
+    
+    company = db.query(Company).filter(Company.id == company_id).first()
     
     data = {
+        "company": vars(company) if company else None,
         "groups": [vars(g) for g in db.query(TallyGroup).filter(TallyGroup.company_id == company_id).all()],
         "ledgers": [vars(l) for l in db.query(Ledger).filter(Ledger.company_id == company_id).all()],
         "vouchers": [vars(v) for v in db.query(Voucher).filter(Voucher.company_id == company_id).all()],
@@ -623,9 +781,13 @@ def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(
     }
     
     # Remove SQLAlchemy state
-    for k in data:
-        for item in data[k]:
-            item.pop('_sa_instance_state', None)
+    for k, v in data.items():
+        if isinstance(v, list):
+            for item in v:
+                if isinstance(item, dict):
+                    item.pop('_sa_instance_state', None)
+        elif isinstance(v, dict):
+            v.pop('_sa_instance_state', None)
             
     filename = f"aivion_backup_{date.today().strftime('%Y%m%d')}.json"
     filepath = os.path.join("C:/tmp", filename) # Correct path for Windows tmp
@@ -667,8 +829,8 @@ def push_pending_vouchers(background_tasks: BackgroundTasks, db: Session = Depen
     return {"message": f"Queued {len(vouchers)} vouchers for Tally synchronization."}
 
 @app.post("/api/sync/upload-app-json")
-async def upload_app_json(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(check_admin_access)):
-    """Restores data from an AIVION native JSON backup."""
+async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(check_admin_access)):
+    """Restores data from an AIVION native JSON backup with optional overwrite."""
     
     content = await file.read()
     try:
@@ -676,39 +838,83 @@ async def upload_app_json(file: UploadFile = File(...), db: Session = Depends(ge
     except:
         raise HTTPException(status_code=400, detail="Invalid JSON file")
 
-    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure
+    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company
     
-    # Simple restore logic (UPSERT by ID or Name where applicable)
     try:
-        # Import Groups
+        # 1. Company Logic
+        target_company_id = current_user.company_id
+        if data.get('company'):
+            c_data = data['company']
+            c_data.pop('_sa_instance_state', None)
+            existing_company = db.query(Company).filter(Company.name == c_data['name']).first()
+            if not existing_company:
+                new_company = Company(**c_data)
+                new_company.id = None # Let DB assign ID
+                db.add(new_company)
+                db.flush()
+                target_company_id = new_company.id
+            else:
+                target_company_id = existing_company.id
+
+        # 2. Import Groups
         for g_data in data.get('groups', []):
-            group = db.query(TallyGroup).filter(TallyGroup.name == g_data['name']).first()
-            if not group:
-                group = TallyGroup(name=g_data['name'], parent_id=g_data.get('parent_id'), tally_guid=g_data.get('tally_guid'))
-                db.add(group)
+            g_data.pop('_sa_instance_state', None)
+            existing = db.query(TallyGroup).filter(TallyGroup.name == g_data['name'], TallyGroup.company_id == target_company_id).first()
+            if existing:
+                if overwrite:
+                    for k, v in g_data.items():
+                        if k != 'id': setattr(existing, k, v)
+            else:
+                g_data.pop('id', None)
+                g_data['company_id'] = target_company_id
+                db.add(TallyGroup(**g_data))
         db.flush()
 
-        # Import Ledgers
+        # 3. Import Ledgers
         for l_data in data.get('ledgers', []):
-            ledger = db.query(Ledger).filter(Ledger.name == l_data['name']).first()
-            if not ledger:
-                # Remove ID if present to avoid conflicts
+            l_data.pop('_sa_instance_state', None)
+            existing = db.query(Ledger).filter(Ledger.name == l_data['name'], Ledger.company_id == target_company_id).first()
+            if existing:
+                if overwrite:
+                    for k, v in l_data.items():
+                        if k != 'id': setattr(existing, k, v)
+            else:
                 l_data.pop('id', None)
-                ledger = Ledger(**l_data)
-                db.add(ledger)
+                l_data['company_id'] = target_company_id
+                db.add(Ledger(**l_data))
         db.flush()
         
-        # Import Vouchers & Entries
+        # 4. Import Stock Items
+        for si_data in data.get('stock_items', []):
+            si_data.pop('_sa_instance_state', None)
+            existing = db.query(StockItem).filter(StockItem.name == si_data['name'], StockItem.company_id == target_company_id).first()
+            if existing:
+                if overwrite:
+                    for k, v in si_data.items():
+                        if k != 'id': setattr(existing, k, v)
+            else:
+                si_data.pop('id', None)
+                si_data['company_id'] = target_company_id
+                db.add(StockItem(**si_data))
+        db.flush()
+
+        # 5. Import Vouchers & Entries
         for v_data in data.get('vouchers', []):
-            vch = db.query(Voucher).filter(Voucher.tally_guid == v_data.get('tally_guid')).first()
-            if not vch:
+            v_data.pop('_sa_instance_state', None)
+            # Use tally_guid or date+voucher_number as key
+            existing = None
+            if v_data.get('tally_guid'):
+                existing = db.query(Voucher).filter(Voucher.tally_guid == v_data['tally_guid'], Voucher.company_id == target_company_id).first()
+            
+            if not existing:
                 v_data.pop('id', None)
-                vch = Voucher(**v_data)
-                db.add(vch)
+                v_data['company_id'] = target_company_id
+                new_vch = Voucher(**v_data)
+                db.add(new_vch)
         db.flush()
         
         db.commit()
-        return {"message": "Data restored successfully from backup."}
+        return {"message": "Data restored successfully.", "company_id": target_company_id}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -1438,7 +1644,17 @@ def get_ledger_vouchers(ledger_id: int, start_date: str = None, end_date: str = 
         })
 
     return {
+        "ledger_id": ledger_id,
         "ledger_name": ledger.name,
+        "address": ledger.address,
+        "city": ledger.city,
+        "state": ledger.state,
+        "pincode": ledger.pincode,
+        "gstin": ledger.gstin,
+        "drug_license_no": ledger.drug_license_no,
+        "fssai_no": ledger.fssai_no,
+        "phone": ledger.phone,
+        "email": ledger.email,
         "opening_balance": abs(opening_balance),
         "is_opening_debit": opening_balance >= 0,
         "closing_balance": abs(current_balance),

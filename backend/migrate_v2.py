@@ -12,7 +12,8 @@ def migrate():
         # 1. Add company_type to companies
         try:
             conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS company_type VARCHAR DEFAULT 'GENERAL'"))
-            print("Verified: companies.company_type")
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS fssai_no VARCHAR"))
+            print("Verified: companies.company_type and fssai_no")
         except Exception as e:
             print(f"Skipping companies.company_type: {e}")
 
@@ -43,9 +44,38 @@ def migrate():
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS drug_license_no VARCHAR"))
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS phone VARCHAR"))
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS email VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS fssai_no VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS tax_type VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS tax_percentage NUMERIC(5,2)"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS tax_head VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS employee_id VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS designation VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS bank_name VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS ifsc_code VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS primary_pan VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS basic_pay NUMERIC(15,4) DEFAULT 0"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS da_pay NUMERIC(15,4) DEFAULT 0"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS hra_pay NUMERIC(15,4) DEFAULT 0"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS other_allowances NUMERIC(15,4) DEFAULT 0"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS total_ctc NUMERIC(15,4) DEFAULT 0"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS monitoring_enabled BOOLEAN DEFAULT FALSE"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS attendance_source VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS shift_type VARCHAR"))
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS tally_guid VARCHAR"))
-            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS alterid INTEGER"))
-            print("Verified: ledgers fields")
+            
+            # Create salary_history table
+            conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS salary_history (
+                    id SERIAL PRIMARY KEY,
+                    ledger_id INTEGER NOT NULL REFERENCES ledgers(id),
+                    effective_date DATE NOT NULL,
+                    old_salary NUMERIC(15,4) NOT NULL,
+                    new_salary NUMERIC(15,4) NOT NULL,
+                    change_percentage NUMERIC(7,2)
+                )
+            """))
+            
+            print("Verified: advanced payroll fields and salary_history table")
         except Exception as e:
             print(f"Skipping ledgers fields: {e}")
 

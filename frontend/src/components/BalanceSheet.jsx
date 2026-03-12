@@ -30,12 +30,30 @@ const BalanceSheet = () => {
   const { liabilities, assets, net_profit, total_liabilities, total_assets } = bsData;
 
   const liabilityColumns = [
-    { title: 'Liabilities', dataIndex: 'name', key: 'name' },
+    { 
+      title: 'Liabilities', 
+      dataIndex: 'name', 
+      key: 'name',
+      render: (text, record) => (
+        <span style={{ fontWeight: (record.is_group || record.key === 'np') ? 'bold' : 'normal' }}>
+          {text}
+        </span>
+      )
+    },
     { title: '', dataIndex: 'credit', key: 'credit', align: 'right', render: (val) => val ? Number(val).toFixed(2) : '' }
   ];
 
   const assetColumns = [
-    { title: 'Assets', dataIndex: 'name', key: 'name' },
+    { 
+      title: 'Assets', 
+      dataIndex: 'name', 
+      key: 'name',
+      render: (text, record) => (
+        <span style={{ fontWeight: (record.is_group || record.key === 'np') ? 'bold' : 'normal' }}>
+          {text}
+        </span>
+      )
+    },
     { title: '', dataIndex: 'debit', key: 'debit', align: 'right', render: (val) => val ? Number(val).toFixed(2) : '' }
   ];
 

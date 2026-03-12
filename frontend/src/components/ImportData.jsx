@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Space, Typography, message, Divider, List, Tag, Alert, Upload, Row, Col } from 'antd';
+import { Card, Button, Space, Typography, message, Divider, List, Tag, Alert, Upload, Row, Col, Checkbox, Modal } from 'antd';
 import { SyncOutlined, ArrowLeftOutlined, CloudDownloadOutlined, DatabaseOutlined, InboxOutlined, FileTextOutlined, CloudUploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useCompany } from '../context/CompanyContext';
@@ -12,6 +12,7 @@ const ImportData = () => {
     const [syncingMasters, setSyncingMasters] = useState(false);
     const [syncingTransactions, setSyncingTransactions] = useState(false);
     const [pushingPending, setPushingPending] = useState(false);
+    const [overwrite, setOverwrite] = useState(false);
     const navigate = useNavigate();
     const { activeCompany } = useCompany();
 
@@ -93,19 +94,25 @@ const ImportData = () => {
         multiple: false,
         accept: '.json',
         customRequest: async ({ file, onSuccess, onError }) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            try {
-                const response = await axios.post('/api/sync/upload-app-json', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                onSuccess(response.data);
-                message.success(`${file.name} backup restored successfully.`);
-            } catch (err) {
-                const errorMsg = err.response?.data?.detail || "Restore failed";
-                onError(new Error(errorMsg));
-                message.error(`${file.name} restoration failed: ${errorMsg}`);
-            }
+            Modal.confirm({
+                title: 'Confirm Restoration',
+                content: `Are you sure you want to restore data from ${file.name}? ${overwrite ? 'Existing records will be OVERWRITTEN.' : 'New records will be added, existing ones will be skipped.'}`,
+                onOk: async () => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    try {
+                        const response = await axios.post(`/api/sync/upload-app-json?overwrite=${overwrite}`, formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        onSuccess(response.data);
+                        message.success(`${file.name} backup restored successfully.`);
+                    } catch (err) {
+                        const errorMsg = err.response?.data?.detail || "Restore failed";
+                        onError(new Error(errorMsg));
+                        message.error(`${file.name} restoration failed: ${errorMsg}`);
+                    }
+                }
+            });
         },
         beforeUpload: (file) => {
             const isJSON = file.type === 'application/json' || file.name.endsWith('.json');
@@ -207,6 +214,13 @@ const ImportData = () => {
                     </Col>
                     <Col span={12}>
                         <Card size="small" title={<><CloudUploadOutlined /> WEEBAL JSON Backup</>}>
+                            <Checkbox 
+                                checked={overwrite} 
+                                onChange={e => setOverwrite(e.target.checked)}
+                                style={{ marginBottom: '10px' }}
+                            >
+                                Overwrite existing data
+                            </Checkbox>
                             <Dragger {...appBackupProps} style={{ padding: '20px', background: '#fff' }}>
                                 <p className="ant-upload-drag-icon">
                                     <CloudUploadOutlined style={{ color: '#1890ff' }} />

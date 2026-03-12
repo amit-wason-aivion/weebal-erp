@@ -278,34 +278,38 @@ const InventoryInfo = () => {
                         </Col>
                     </Row>
 
-                    <Divider orientation="left" style={{ borderColor: '#008080', margin: '10px 0' }}>
-                        <Text strong style={{ color: '#008080', fontSize: '11px' }}>PHARMA / DRUG DETAILS</Text>
-                    </Divider>
+                    {activeCompany?.company_type === 'PHARMA' && (
+                        <>
+                            <Divider orientation="left" style={{ borderColor: '#008080', margin: '10px 0' }}>
+                                <Text strong style={{ color: '#008080', fontSize: '11px' }}>PHARMA / DRUG DETAILS</Text>
+                            </Divider>
 
-                    <Form.Item name="salt_composition" label="Salt Composition">
-                        <Input placeholder="e.g. Paracetamol + Caffeine" />
-                    </Form.Item>
-
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Form.Item name="rack_number" label="Rack / Shelf No.">
-                                <Input placeholder="A-101" />
+                            <Form.Item name="salt_composition" label="Salt Composition">
+                                <Input placeholder="e.g. Paracetamol + Caffeine" />
                             </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                             <Space style={{ marginTop: 30 }}>
-                                <Form.Item name="is_narcotic" valuePropName="checked" noStyle>
-                                    <Switch size="small" />
-                                </Form.Item>
-                                <Text size="small">Narcotic</Text>
-                                
-                                <Form.Item name="is_h1" valuePropName="checked" noStyle style={{ marginLeft: 10 }}>
-                                    <Switch size="small" />
-                                </Form.Item>
-                                <Text size="small">H1 Drug</Text>
-                             </Space>
-                        </Col>
-                    </Row>
+
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="rack_number" label="Rack / Shelf No.">
+                                        <Input placeholder="A-101" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Space style={{ marginTop: 30 }}>
+                                        <Form.Item name="is_narcotic" valuePropName="checked" noStyle>
+                                            <Switch size="small" />
+                                        </Form.Item>
+                                        <Text size="small">Narcotic</Text>
+
+                                        <Form.Item name="is_h1" valuePropName="checked" noStyle>
+                                            <Switch size="small" />
+                                        </Form.Item>
+                                        <Text size="small">H1 Drug</Text>
+                                    </Space>
+                                </Col>
+                            </Row>
+                        </>
+                    )}
 
                     <Form.Item>
                         <Space style={{ width: '100%', justifyContent: 'flex-end' }}>

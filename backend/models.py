@@ -46,8 +46,30 @@ class Ledger(Base):
     gstin = Column(String, nullable=True)
     pan_no = Column(String, nullable=True)
     drug_license_no = Column(String, nullable=True)
+    fssai_no = Column(String, nullable=True)
     phone = Column(String, nullable=True)
     email = Column(String, nullable=True)
+    tax_type = Column(String, nullable=True) # e.g. 'GST', 'TDS'
+    tax_percentage = Column(Numeric(5, 2), nullable=True) # e.g. 18.00
+    tax_head = Column(String, nullable=True) # e.g. 'Input', 'Output'
+    
+    # Employee & Payment Details
+    employee_id = Column(String, nullable=True)
+    designation = Column(String, nullable=True)
+    bank_name = Column(String, nullable=True)
+    account_no = Column(String, nullable=True)
+    ifsc_code = Column(String, nullable=True)
+    primary_pan = Column(String, nullable=True)
+    
+    # Advanced Payroll Monitoring
+    basic_pay = Column(Numeric(15, 4), default=0.00)
+    da_pay = Column(Numeric(15, 4), default=0.00)
+    hra_pay = Column(Numeric(15, 4), default=0.00)
+    other_allowances = Column(Numeric(15, 4), default=0.00)
+    total_ctc = Column(Numeric(15, 4), default=0.00)
+    monitoring_enabled = Column(Boolean, default=False)
+    attendance_source = Column(String, nullable=True) # Manual, Biometric, Geofence
+    shift_type = Column(String, nullable=True) # General, Night, Rotating
     
     # Tally Sync Columns
     tally_guid = Column(String, unique=True, index=True)
@@ -56,6 +78,20 @@ class Ledger(Base):
     # Relationships
     group = relationship("TallyGroup", back_populates="ledgers")
     entries = relationship("VoucherEntry", back_populates="ledger")
+    salary_history = relationship("SalaryHistory", back_populates="ledger", cascade="all, delete-orphan")
+
+class SalaryHistory(Base):
+    __tablename__ = "salary_history"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ledger_id = Column(Integer, ForeignKey('ledgers.id'), nullable=False)
+    effective_date = Column(Date, nullable=False)
+    old_salary = Column(Numeric(15, 4), nullable=False)
+    new_salary = Column(Numeric(15, 4), nullable=False)
+    change_percentage = Column(Numeric(7, 2), nullable=True)
+    
+    # Relationships
+    ledger = relationship("Ledger", back_populates="salary_history")
 
 class VoucherType(Base):
     """
@@ -218,6 +254,7 @@ class Company(Base):
     email = Column(String, nullable=True)
     gstin = Column(String, nullable=True)
     drug_license_no = Column(String, nullable=True)
+    fssai_no = Column(String, nullable=True)
     company_type = Column(String, default="GENERAL") # 'GENERAL' or 'PHARMA'
     
     financial_year_from = Column(Date, nullable=False)

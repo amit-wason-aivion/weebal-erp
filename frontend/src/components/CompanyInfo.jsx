@@ -19,6 +19,7 @@ const CompanyInfo = () => {
     const navigate = useNavigate();
     const { selectCompany } = useCompany();
     const userRole = localStorage.getItem('role');
+    const companyTypeWatch = Form.useWatch('company_type', form);
 
     useEffect(() => {
         fetchCompanies();
@@ -229,6 +230,17 @@ const CompanyInfo = () => {
                                 <Form.Item name="state" label="State"><Input /></Form.Item>
                                 <Form.Item name="pin_code" label="Pincode"><Input /></Form.Item>
                             </Space>
+
+                            {companyTypeWatch === 'PHARMA' && (
+                                <Space>
+                                    <Form.Item name="drug_license_no" label="Drug License No.">
+                                        <Input placeholder="DL No." />
+                                    </Form.Item>
+                                    <Form.Item name="fssai_no" label="FSSAI No.">
+                                        <Input placeholder="FSSAI No." />
+                                    </Form.Item>
+                                </Space>
+                            )}
                             
                             <Divider style={{ margin: '10px 0' }} />
                             
