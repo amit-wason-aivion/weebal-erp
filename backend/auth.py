@@ -96,6 +96,6 @@ def check_admin_access(current_user: User = Depends(get_current_user)):
     if user_role not in ["admin", "superadmin", "administrator"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Admin access required"
+            detail=f"Admin access required. Current role: '{current_user.role}'"
         )
     return current_user
