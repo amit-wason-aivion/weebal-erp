@@ -60,19 +60,23 @@ def get_current_company(
 ):
     """
     Extracts company_id from headers, query params, or the user's direct assignment.
-    For non-superadmins: Strictly uses their assigned company_id.
-    For superadmins: Requires a company context via header or query param.
+    For non-superadmins/non-admins: Strictly uses their assigned company_id.
+    For superadmins/admins: Requires a company context via header or query param.
     """
-    if current_user.role != "superadmin":
+    user_role = (current_user.role or "").lower()
+    
+    # If not a global role, strictly use assigned company_id
+    if user_role not in ["superadmin", "admin"]:
         if not current_user.company_id:
             raise HTTPException(status_code=403, detail="User is not assigned to any company.")
         return current_user.company_id
         
-    # Superadmin context resolution
+    # Global role (superadmin/admin) context resolution
+    # They can use any company if provided via header/param, else fallback to their assigned one
     effective_id = x_company_id or company_id or current_user.company_id
     
     if not effective_id:
-        raise HTTPException(status_code=400, detail="Superadmin must provide X-Company-ID header or company_id query param.")
+        raise HTTPException(status_code=400, detail="Administrative user must provide X-Company-ID header or company_id query param.")
         
     return effective_id
 

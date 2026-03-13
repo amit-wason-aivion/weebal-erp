@@ -14,7 +14,7 @@ def create_admin():
         admin_user = User(
             username="admin",
             password_hash=get_password_hash("admin123"),
-            role="admin"
+            role="superadmin"
         )
         db.add(admin_user)
         db.commit()
