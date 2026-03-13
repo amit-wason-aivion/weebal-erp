@@ -63,7 +63,7 @@ def get_current_company(
     For non-superadmins/non-admins: Strictly uses their assigned company_id.
     For superadmins/admins: Requires a company context via header or query param.
     """
-    user_role = (current_user.role or "").lower()
+    user_role = (current_user.role or "").lower().strip()
     
     # If not a global role, strictly use assigned company_id
     if user_role not in ["superadmin", "admin"]:
@@ -82,7 +82,7 @@ def get_current_company(
 
 def check_report_access(current_user: User = Depends(get_current_user)):
     """Restricts access to 'Admin', 'superadmin', and 'Viewer' roles only."""
-    user_role = (current_user.role or "").lower()
+    user_role = (current_user.role or "").lower().strip()
     if user_role not in ["admin", "superadmin", "viewer"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -92,10 +92,10 @@ def check_report_access(current_user: User = Depends(get_current_user)):
 
 def check_admin_access(current_user: User = Depends(get_current_user)):
     """Strictly for Company Admin or Global Superadmin."""
-    user_role = (current_user.role or "").lower()
+    user_role = (current_user.role or "").lower().strip()
     if user_role not in ["admin", "superadmin"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Admin access required for this operation."
+            detail="Admin access required"
         )
     return current_user
