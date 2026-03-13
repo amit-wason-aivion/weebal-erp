@@ -1,15 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Typography, message } from 'antd';
 import axios from '../api/axios';
 
 import { useNavigate } from 'react-router-dom';
 import { useCompany } from '../context/CompanyContext';
+import CompanyFeaturesModal from './CompanyFeaturesModal';
+import UserConfigModal from './UserConfigModal';
 
 const { Text } = Typography;
 
 const Gateway = () => {
   const navigate = useNavigate();
-  const { activeCompany } = useCompany();
+  const { activeCompany, fetchCompanies } = useCompany(); 
+  
+  const [featuresVisible, setFeaturesVisible] = useState(false);
+  const [configVisible, setConfigVisible] = useState(false);
   
   const role = localStorage.getItem('role');
   const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
@@ -17,7 +22,7 @@ const Gateway = () => {
 
   // RBAC Flags
   const isSuper = role === 'superadmin';
-  const isAdmin = role === 'admin';
+  const isAdmin = role === 'Admin';
   const canManageMasters = permissions.masters || isSuper || isAdmin;
   const canManageVouchers = permissions.vouchers || isSuper || isAdmin;
   const canManageInventory = permissions.inventory || isSuper || isAdmin;
@@ -42,34 +47,19 @@ const Gateway = () => {
       if (key === 'a' && canManageMasters) navigate('/accounts-info'); 
       if (key === 'i' && canManageInventory) navigate('/inventory-info'); 
       if (key === 'u' && (isAdmin || isSuper)) navigate('/users');
-      if (key === 'o' && isAdmin) navigate('/import-data'); 
+      if (key === 'o' && (isAdmin || isSuper)) navigate('/import-data'); 
       if (key === 'r' && canViewReports) navigate('/ratio-analysis'); 
-      if (key === 'n') message.info('Banking module coming in Version 2.0'); 
+      if (key === 'h' && canViewReports && activeCompany?.company_type === 'PHARMA') navigate('/pharma-reports');
+      if (key === 'n') navigate('/banking'); 
       if (key === 'q' || key === 'l') {
         localStorage.clear();
         navigate('/login');
       }
       
-      // Phase 14.7: Export Hotkey
-      if (key === 'e' && isAdmin) {
-        const token = localStorage.getItem('token');
-        const url = `${axios.defaults.baseURL}/api/sync/export-app-data`;
-        
-        // Use a hidden anchor to trigger download with Auth header
-        fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
-          .then(resp => resp.blob())
-          .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `weebal_backup_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.json`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            message.success("Backup export started.");
-          })
-          .catch(() => message.error("Export failed."));
+      // Export Hotkey
+      if (key === 'e' && (isAdmin || isSuper)) {
+        e.preventDefault();
+        handleExport();
       }
 
       // Alt+F3 for Company Info (Superadmin only for creation, but others can view if they have it)
@@ -81,19 +71,19 @@ const Gateway = () => {
       // F11: Features Placeholder
       if (e.key === 'F11') {
         e.preventDefault();
-        message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0');
+        setFeaturesVisible(true);
       }
 
       // F12: Configure Placeholder
       if (e.key === 'F12') {
         e.preventDefault();
-        message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0');
+        setConfigVisible(true);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate]);
+  }, [navigate, activeCompany, isAdmin, isSuper, canManageMasters, canManageVouchers, canManageInventory, canViewReports, fetchCompanies]);
 
   // Styles to mimic Classic Tally 9 aesthetic
   const theme = {
@@ -106,8 +96,44 @@ const Gateway = () => {
     panelBg: '#ffffff',   // White background for menu lists
   };
 
-  const TopMenuButton = ({ label, hotkey }) => (
-    <div style={{ padding: '2px 10px', display: 'inline-block', borderRight: `1px solid ${theme.border}`, fontSize: '12px' }}>
+  const handleExport = async () => {
+    if (!isAdmin && !isSuper) {
+      message.error("Only administrators can export data.");
+      return;
+    }
+    
+    try {
+      // Use axios so our interceptors add Auth + X-Company-ID automatically
+      const resp = await axios.get('/api/sync/export-app-data', {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([resp.data]));
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `weebal_backup_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      message.success("Backup export started.");
+    } catch (err) {
+      console.error("Export error:", err);
+      message.error("Export failed. Please ensure you have a company selected.");
+    }
+  };
+
+  const TopMenuButton = ({ label, hotkey, onClick }) => (
+    <div 
+      onClick={onClick}
+      style={{ 
+        padding: '2px 10px', 
+        display: 'inline-block', 
+        borderRight: `1px solid ${theme.border}`, 
+        fontSize: '12px',
+        cursor: onClick ? 'pointer' : 'default'
+      }}
+    >
       <Text style={{ color: theme.hotkey, textDecoration: 'underline' }}>{hotkey}</Text>: {label}
     </div>
   );
@@ -153,13 +179,14 @@ const Gateway = () => {
       <div style={{ backgroundColor: '#e0e0e0', borderBottom: `1px solid ${theme.border}`, height: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 5px' }}>
           <div>
-            <TopMenuButton label="Print" hotkey="P" />
-            <TopMenuButton label="Export" hotkey="E" />
-            <TopMenuButton label="E-Mail" hotkey="M" />
-            <TopMenuButton label="Upload" hotkey="O" />
+            <TopMenuButton label="Print" hotkey="P" onClick={() => message.info("Print feature coming in next update")} />
+            <TopMenuButton label="Export" hotkey="E" onClick={handleExport} />
+            <TopMenuButton label="E-Mail" hotkey="M" onClick={() => message.info("E-Mail feature coming in next update")} />
+            <TopMenuButton label="Upload" hotkey="O" onClick={() => navigate('/import-data')} />
           </div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', fontStyle: 'italic', letterSpacing: '2px', color: '#000', alignSelf: 'center', position: 'absolute', width: '100%', textAlign: 'center', pointerEvents: 'none' }}>
-            WEEBAL ERP
+          <div style={{ alignSelf: 'center', position: 'absolute', width: '100%', textAlign: 'center', pointerEvents: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <img src="/logo.png" alt="WEEBAL Logo" style={{ height: '32px', marginRight: '10px' }} />
+            <span style={{ fontSize: '24px', fontWeight: 'bold', fontStyle: 'italic', letterSpacing: '2px', color: '#000' }}>WEEBAL ERP</span>
           </div>
           <div>
             <TopMenuButton label="Language" hotkey="L" />
@@ -170,8 +197,11 @@ const Gateway = () => {
       </div>
 
       {/* Gateway Green Info Bar */}
-      <div style={{ backgroundColor: theme.headerBg, color: theme.headerText, display: 'flex', justifyContent: 'space-between', padding: '2px 10px', fontSize: '12px', fontWeight: 'bold' }}>
-        <span>Gateway of WEEBAL</span>
+      <div style={{ backgroundColor: theme.headerBg, color: theme.headerText, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2px 10px', fontSize: '12px', fontWeight: 'bold' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.png" alt="" style={{ height: '14px', marginRight: '8px', filter: 'brightness(0) invert(1)' }} />
+          <span>Gateway of WEEBAL</span>
+        </div>
         <span>Ctrl + M ✖</span>
       </div>
 
@@ -250,10 +280,9 @@ const Gateway = () => {
                 </>
               )}
               
-              <MenuSectionHeading title="Import" />
-              {isAdmin && <MenuItem label="Import of Data" hotkeyChar="O" onClick={() => navigate('/import-data')} />}
-              {(isAdmin || isSuper) && <MenuItem label="User Management" hotkeyChar="U" onClick={() => navigate('/users')} />}
-              <MenuItem label="Banking" hotkeyChar="N" onClick={() => message.info('Banking module coming in Version 2.0')} />
+              <MenuSectionHeading title="Data Sync" />
+              {(isAdmin || isSuper) && <MenuItem label="Tally Import" hotkeyChar="O" onClick={() => navigate('/import-data')} />}
+              <MenuItem label="Banking" hotkeyChar="N" onClick={() => navigate('/banking')} />
               
               <MenuSectionHeading title="Reports" />
               {canViewReports && (
@@ -262,11 +291,17 @@ const Gateway = () => {
                   <MenuItem label="Profit & Loss A/c" hotkeyChar="P" onClick={() => navigate('/pnl')} />
                   <MenuItem label="Trial Balance" hotkeyChar="T" onClick={() => navigate('/trial')} />
                   <MenuItem label="Ratio Analysis" hotkeyChar="R" onClick={() => navigate('/ratio-analysis')} />
+                  {activeCompany?.company_type === 'PHARMA' && (
+                    <MenuItem label="Pharma Reports" hotkeyChar="H" onClick={() => navigate('/pharma-reports')} />
+                  )}
                 </>
               )}
               
               <MenuSectionHeading title="Display" />
               {canViewReports && <MenuItem label="Day Book" hotkeyChar="D" onClick={() => navigate('/daybook')} />}
+              
+              <MenuSectionHeading title="Administration" />
+              {(isAdmin || isSuper) && <MenuItem label="User Management" hotkeyChar="U" onClick={() => navigate('/users')} />}
               
               <div style={{ marginTop: '10px' }}>
                 <MenuItem label="Logout" hotkeyChar="L" onClick={() => {
@@ -288,13 +323,13 @@ const Gateway = () => {
         <div style={{ width: '100px', backgroundColor: '#e0e0e0', borderLeft: `1px solid ${theme.border}`, display: 'flex', flexDirection: 'column', height: '100%' }}>
            <div style={{ flex: 1 }}></div>
            <div 
-             onClick={() => message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0')}
+             onClick={() => setFeaturesVisible(true)}
              style={{ borderTop: `1px solid ${theme.border}`, borderBottom: `1px solid ${theme.border}`, padding: '4px', fontSize: '12px', textAlign: 'center', cursor: 'pointer' }}
            >
              <Text style={{ color: theme.hotkey, fontWeight: 'bold' }}>F11:</Text> Features
            </div>
            <div 
-             onClick={() => message.info('Features & Configuration settings will be available in WEEBAL ERP V2.0')}
+             onClick={() => setConfigVisible(true)}
              style={{ borderBottom: `1px solid ${theme.border}`, padding: '4px', fontSize: '12px', textAlign: 'center', cursor: 'pointer' }}
            >
              <Text style={{ color: theme.hotkey, fontWeight: 'bold' }}>F12:</Text> Configure
@@ -310,6 +345,16 @@ const Gateway = () => {
         <span>Ctrl + N</span>
       </div>
 
+      <CompanyFeaturesModal 
+        visible={featuresVisible} 
+        onClose={() => setFeaturesVisible(false)} 
+        company={activeCompany}
+        onUpdate={fetchCompanies}
+      />
+      <UserConfigModal 
+        visible={configVisible} 
+        onClose={() => setConfigVisible(false)} 
+      />
     </div>
   );
 };

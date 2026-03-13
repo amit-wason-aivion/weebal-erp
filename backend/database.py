@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # Database Connection String
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/aivion_erp")
@@ -54,7 +54,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
     # Only use create_all for simple setups/tests. Migrations should use Alembic.
+    print("Initializing database tables...")
     Base.metadata.create_all(bind=engine)
+    print("Database tables initialized successfully.")
 
 def get_db():
     db = SessionLocal()

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Drawer, Form, Input, Select, InputNumber, Space, Typography, message, Card, Tag, Tabs, Modal } from 'antd';
+import { Table, Button, Drawer, Form, Input, Select, InputNumber, Space, Typography, message, Card, Tag, Tabs, Modal, Row, Col } from 'antd';
 import { PlusOutlined, SearchOutlined, ArrowLeftOutlined, ShoppingCartOutlined, InboxOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
@@ -108,6 +108,24 @@ const InventoryInfo = () => {
             dataIndex: 'uom_id',
             key: 'uom_id',
             render: (uomId) => uoms.find(u => u.id === uomId)?.symbol || 'Unit'
+        },
+        {
+            title: 'Main Unit',
+            dataIndex: 'main_unit_name',
+            key: 'main_unit_name',
+            render: (val) => val || '-'
+        },
+        {
+            title: 'Sub Unit',
+            dataIndex: 'sub_unit_name',
+            key: 'sub_unit_name',
+            render: (val) => val || '-'
+        },
+        {
+            title: 'Factor',
+            dataIndex: 'conversion_factor',
+            key: 'conversion_factor',
+            render: (val) => val || 1
         }
     ];
 
@@ -233,6 +251,65 @@ const InventoryInfo = () => {
                             {uoms.map(u => <Option key={u.id} value={u.id}>{u.symbol} ({u.formal_name})</Option>)}
                         </Select>
                     </Form.Item>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="main_unit_name" label="Main Unit Name (e.g. Box)">
+                                <Input placeholder="Box" />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="sub_unit_name" label="Sub Unit Name (e.g. Strip)">
+                                <Input placeholder="Strip" />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item name="conversion_factor" label="Conversion Factor" initialValue={1}>
+                                <InputNumber min={1} style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item name="min_stock_level" label="Re-order Level" initialValue={0}>
+                                <InputNumber min={0} style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    {activeCompany?.company_type === 'PHARMA' && (
+                        <>
+                            <Divider orientation="left" style={{ borderColor: '#008080', margin: '10px 0' }}>
+                                <Text strong style={{ color: '#008080', fontSize: '11px' }}>PHARMA / DRUG DETAILS</Text>
+                            </Divider>
+
+                            <Form.Item name="salt_composition" label="Salt Composition">
+                                <Input placeholder="e.g. Paracetamol + Caffeine" />
+                            </Form.Item>
+
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item name="rack_number" label="Rack / Shelf No.">
+                                        <Input placeholder="A-101" />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={12}>
+                                    <Space style={{ marginTop: 30 }}>
+                                        <Form.Item name="is_narcotic" valuePropName="checked" noStyle>
+                                            <Switch size="small" />
+                                        </Form.Item>
+                                        <Text size="small">Narcotic</Text>
+
+                                        <Form.Item name="is_h1" valuePropName="checked" noStyle>
+                                            <Switch size="small" />
+                                        </Form.Item>
+                                        <Text size="small">H1 Drug</Text>
+                                    </Space>
+                                </Col>
+                            </Row>
+                        </>
+                    )}
 
                     <Form.Item>
                         <Space style={{ width: '100%', justifyContent: 'flex-end' }}>

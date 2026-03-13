@@ -31,12 +31,30 @@ const PnL = () => {
 
   // Flatten tree for simple Tally-like display using expandable tables
   const expenseColumns = [
-    { title: 'Particulars', dataIndex: 'name', key: 'name' },
+    { 
+      title: 'Particulars', 
+      dataIndex: 'name', 
+      key: 'name',
+      render: (text, record) => (
+        <span style={{ fontWeight: (record.is_group || record.id === 'gp' || record.id === 'np') ? 'bold' : 'normal' }}>
+          {text}
+        </span>
+      )
+    },
     { title: '', dataIndex: 'debit', key: 'debit', align: 'right', render: (val) => val ? Number(val).toFixed(2) : '' }
   ];
 
   const incomeColumns = [
-    { title: 'Particulars', dataIndex: 'name', key: 'name' },
+    { 
+      title: 'Particulars', 
+      dataIndex: 'name', 
+      key: 'name',
+      render: (text, record) => (
+        <span style={{ fontWeight: (record.is_group || record.id === 'gp' || record.id === 'np') ? 'bold' : 'normal' }}>
+          {text}
+        </span>
+      )
+    },
     { title: '', dataIndex: 'credit', key: 'credit', align: 'right', render: (val) => val ? Number(val).toFixed(2) : '' }
   ];
 

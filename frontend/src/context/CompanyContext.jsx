@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from '../api/axios';
 
 const CompanyContext = createContext();
 
@@ -28,8 +29,28 @@ export const CompanyProvider = ({ children }) => {
         }
     };
 
+    const fetchCompanies = async () => {
+        try {
+            const { data } = await axios.get('/api/companies');
+            // If active company exists, update it with fresh data
+            if (activeCompany) {
+                const fresh = data.find(c => c.id === activeCompany.id);
+                if (fresh) selectCompany(fresh);
+            }
+            return data;
+        } catch (e) {
+            console.error("Error fetching companies", e);
+        }
+    };
+
     return (
-        <CompanyContext.Provider value={{ activeCompany, selectCompany, loading }}>
+        <CompanyContext.Provider value={{ 
+            activeCompany, 
+            selectCompany, 
+            fetchCompanies,
+            loading, 
+            companyType: activeCompany?.company_type || 'GENERAL' 
+        }}>
             {children}
         </CompanyContext.Provider>
     );

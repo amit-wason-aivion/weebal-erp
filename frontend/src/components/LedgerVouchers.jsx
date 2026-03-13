@@ -44,9 +44,26 @@ const LedgerVouchers = () => {
   return (
     <div style={{ height: '100%', padding: '20px', backgroundColor: '#fdfadd', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-        <div style={{ textAlign: 'center', flex: 1 }}>
+        <div style={{ flex: 1 }}>
           <Title level={3} style={{ margin: 0, color: '#008080' }}>Ledger: {ledgerData.ledger_name}</Title>
-          <Text type="secondary">For the current period</Text>
+          <div style={{ marginTop: '5px' }}>
+            {ledgerData.address && <Text block style={{ fontSize: '12px' }}>{ledgerData.address}</Text>}
+            {ledgerData.city && <Text style={{ fontSize: '12px' }}>{ledgerData.city}, </Text>}
+            {ledgerData.state && <Text style={{ fontSize: '12px' }}>{ledgerData.state} </Text>}
+            {ledgerData.pincode && <Text style={{ fontSize: '12px' }}>- {ledgerData.pincode}</Text>}
+            {(ledgerData.gstin || ledgerData.phone) && (
+              <div style={{ marginTop: '2px' }}>
+                {ledgerData.gstin && <Text strong style={{ fontSize: '11px', marginRight: '15px' }}>GSTIN: {ledgerData.gstin}</Text>}
+                {ledgerData.phone && <Text style={{ fontSize: '11px' }}>Ph: {ledgerData.phone}</Text>}
+              </div>
+            )}
+            {(ledgerData.drug_license_no || ledgerData.fssai_no) && (
+              <div style={{ marginTop: '2px' }}>
+                {ledgerData.drug_license_no && <Text style={{ fontSize: '11px', marginRight: '15px' }}>DL No: {ledgerData.drug_license_no}</Text>}
+                {ledgerData.fssai_no && <Text style={{ fontSize: '11px' }}>FSSAI: {ledgerData.fssai_no}</Text>}
+              </div>
+            )}
+          </div>
         </div>
         <div style={{ display: 'flex' }}>
           <Button onClick={() => navigate(-1)} style={{ marginRight: '10px' }}>[Esc] Back</Button>

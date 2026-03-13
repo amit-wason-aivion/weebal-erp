@@ -45,7 +45,8 @@ const Login = () => {
                     styles={{ body: { padding: '40px' } }}
                 >
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <Title level={2} style={{ color: '#001529', marginBottom: '5px' }}>WEEBAL ERP</Title>
+                        <img src="/logo.png" alt="WEEBAL Logo" style={{ height: '60px', marginBottom: '15px' }} />
+                        <Title level={2} style={{ color: '#001529', marginBottom: '5px', marginTop: 0 }}>WEEBAL ERP</Title>
                         <Text type="secondary">Welcome to WEEBAL ERP</Text>
                     </div>
 

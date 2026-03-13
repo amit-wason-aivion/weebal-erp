@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
+import { message } from 'antd';
 import TrialBalance from './components/TrialBalance';
 import VoucherEntry from './components/VoucherEntry';
 import SalesInvoice from './components/SalesInvoice';
@@ -19,6 +20,8 @@ import ImportData from './components/ImportData';
 import RatioAnalysis from './components/RatioAnalysis';
 import CompanyInfo from './components/CompanyInfo';
 import UserManagement from './components/UserManagement';
+import PharmaReports from './components/PharmaReports';
+import Banking from './components/Banking';
 import { CompanyProvider } from './context/CompanyContext';
 import 'antd/dist/reset.css'; // Ant Design basic reset
 
@@ -27,6 +30,17 @@ const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Pharma Route Wrapper
+import { useCompany } from './context/CompanyContext';
+const PharmaRoute = ({ children }) => {
+  const { activeCompany } = useCompany();
+  if (activeCompany?.company_type !== 'PHARMA') {
+    message.error("Not Authorized: This report is for Pharma companies only.");
+    return <Navigate to="/" replace />;
   }
   return children;
 };
@@ -89,6 +103,8 @@ function AppContent() {
           <Route path="/pnl" element={<ProtectedRoute><PnL /></ProtectedRoute>} />
           <Route path="/bs" element={<ProtectedRoute><BalanceSheet /></ProtectedRoute>} />
           <Route path="/daybook" element={<ProtectedRoute><DayBook /></ProtectedRoute>} />
+          <Route path="/banking" element={<ProtectedRoute><Banking /></ProtectedRoute>} />
+          <Route path="/ledger-vouchers/:id" element={<ProtectedRoute><LedgerVouchers /></ProtectedRoute>} />
           <Route path="/ledger-vouchers/:id" element={<ProtectedRoute><LedgerVouchers /></ProtectedRoute>} />
           <Route path="/purchase" element={<ProtectedRoute><PurchaseInvoice /></ProtectedRoute>} />
           <Route path="/purchase/:id" element={<ProtectedRoute><PurchaseInvoice /></ProtectedRoute>} />
@@ -98,6 +114,7 @@ function AppContent() {
           <Route path="/ratio-analysis" element={<ProtectedRoute><RatioAnalysis /></ProtectedRoute>} />
           <Route path="/company-info" element={<ProtectedRoute><CompanyInfo /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+          <Route path="/pharma-reports" element={<ProtectedRoute><PharmaRoute><PharmaReports /></PharmaRoute></ProtectedRoute>} />
         </Routes>
       </main>
     </div>

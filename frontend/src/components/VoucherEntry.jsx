@@ -20,8 +20,8 @@ const VoucherEntry = () => {
   const [form] = Form.useForm();
   const [ledgers, setLedgers] = useState([]);
   const [entries, setEntries] = useState([
-    { key: 0, ledger_id: null, is_debit: true, amount: null },
-    { key: 1, ledger_id: null, is_debit: false, amount: null }
+    { key: 0, ledger_id: null, is_debit: true, amount: null, instrument_no: '', instrument_date: null },
+    { key: 1, ledger_id: null, is_debit: false, amount: null, instrument_no: '', instrument_date: null }
   ]);
   const [voucherType, setVoucherType] = useState('1'); 
   const navigate = useNavigate();
@@ -33,26 +33,31 @@ const VoucherEntry = () => {
   // Tally hotkey listeners
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
-      // Don't trigger hotkeys if typing in an input (except Alt+A for save)
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
-        if (e.ctrlKey && e.key.toLowerCase() === 'a') {
-            e.preventDefault();
-            form.submit();
-        }
-        return;
-      }
-
+      // Always prevent browser default for F4-F9
       if (['F4', 'F5', 'F6', 'F7', 'F8', 'F9'].includes(e.key)) {
         e.preventDefault();
       }
 
+      // Handle specific keys
       if (e.key === 'F4') setVoucherType('4'); // Contra
       if (e.key === 'F5') setVoucherType('5'); // Payment
       if (e.key === 'F6') setVoucherType('6'); // Receipt
       if (e.key === 'F7') setVoucherType('1'); // Journal
       if (e.key === 'F8') setVoucherType('2'); // Sales
       if (e.key === 'F9') setVoucherType('3'); // Purchase
-      if (e.key === 'Escape') navigate('/');
+      
+      if (e.key === 'Escape') {
+          // Only navigate if NOT in an input (standard Tally behavior)
+          if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+              navigate('/');
+          }
+      }
+
+      // Handle Ctrl+A for Save
+      if (e.ctrlKey && e.key.toLowerCase() === 'a') {
+          e.preventDefault();
+          form.submit();
+      }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
@@ -68,6 +73,7 @@ const VoucherEntry = () => {
       axios.get(`/api/vouchers/${id}`)
         .then(res => {
           const v = res.data;
+          // Ensure voucherType is a string for state matching
           setVoucherType(v.voucher_type_id.toString());
           form.setFieldsValue({
             date: dayjs(v.date),
@@ -105,7 +111,9 @@ const VoucherEntry = () => {
         key: newKey, 
         ledger_id: null, 
         is_debit: nextIsDebit, 
-        amount: diff > 0 ? diff : null 
+        amount: diff > 0 ? diff : null,
+        instrument_no: '',
+        instrument_date: null
     });
     setEntries(newEntries);
 
@@ -138,7 +146,9 @@ const VoucherEntry = () => {
       entries: validEntries.map(e => ({
         ledger_id: e.ledger_id,
         amount: parseFloat(e.amount),
-        is_debit: e.is_debit
+        is_debit: e.is_debit,
+        instrument_no: e.instrument_no,
+        instrument_date: e.instrument_date
       }))
     };
 
@@ -154,8 +164,8 @@ const VoucherEntry = () => {
       } else {
         form.resetFields();
         setEntries([
-          { key: 0, ledger_id: null, is_debit: true, amount: null },
-          { key: 1, ledger_id: null, is_debit: false, amount: null }
+          { key: 0, ledger_id: null, is_debit: true, amount: null, instrument_no: '', instrument_date: null },
+          { key: 1, ledger_id: null, is_debit: false, amount: null, instrument_no: '', instrument_date: null }
         ]);
       }
     } catch (err) {
@@ -195,6 +205,9 @@ const VoucherEntry = () => {
         const balanceText = selectedLedger 
             ? `Current Bal: ₹ ${Math.abs(selectedLedger.opening_balance).toLocaleString()} ${selectedLedger.is_debit_balance ? 'Dr' : 'Cr'}`
             : '';
+        const detailText = selectedLedger && (selectedLedger.city || selectedLedger.gstin)
+            ? `${selectedLedger.city ? selectedLedger.city : ''}${selectedLedger.city && selectedLedger.gstin ? ' | ' : ''}${selectedLedger.gstin ? 'GST: ' + selectedLedger.gstin : ''}`
+            : '';
 
         return (
             <div>
@@ -216,8 +229,47 @@ const VoucherEntry = () => {
                 >
                     {ledgers.map(l => <Option key={l.id} value={l.id}>{l.name}</Option>)}
                 </Select>
-                {balanceText && <div style={{ fontSize: '11px', color: '#888', marginTop: '2px', fontStyle: 'italic' }}>{balanceText}</div>}
+                <div style={{ fontSize: '11px', color: '#888', marginTop: '2px', fontStyle: 'italic', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{balanceText}</span>
+                    <span style={{ color: '#008080' }}>{detailText}</span>
+                </div>
             </div>
+        );
+      }
+    },
+    {
+      "title": 'Inst. No',
+      "dataIndex": 'instrument_no',
+      "width": '10%',
+      "render": (text, record) => {
+        const selectedLedger = ledgers.find(l => l.id === record.ledger_id);
+        const isBank = selectedLedger?.group_name === 'Bank Accounts';
+        return (
+          <Input 
+            value={record.instrument_no} 
+            onChange={(e) => handleEntryChange(record.key, 'instrument_no', e.target.value)}
+            size="small"
+            disabled={!isBank}
+            placeholder={isBank ? "Chq No" : ""}
+          />
+        );
+      }
+    },
+    {
+      "title": 'Inst. Date',
+      "dataIndex": 'instrument_date',
+      "width": '12%',
+      "render": (text, record) => {
+        const selectedLedger = ledgers.find(l => l.id === record.ledger_id);
+        const isBank = selectedLedger?.group_name === 'Bank Accounts';
+        return (
+          <DatePicker 
+            value={record.instrument_date ? dayjs(record.instrument_date) : null}
+            onChange={(date, dateStr) => handleEntryChange(record.key, 'instrument_date', dateStr)}
+            size="small"
+            style={{ width: '100%' }}
+            disabled={!isBank}
+          />
         );
       }
     },
@@ -279,8 +331,11 @@ const VoucherEntry = () => {
 
   return (
     <div style={{ height: '100%', padding: '20px', backgroundColor: '#fdfadd', display: 'flex', flexDirection: 'column', fontFamily: 'Arial, sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', backgroundColor: '#002140', color: 'white', padding: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-        <Title level={4} style={{ color: 'white', margin: 0 }}>Voucher {id ? 'Alteration' : 'Creation'}</Title>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', backgroundColor: '#002140', color: 'white', padding: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.png" alt="WEEBAL Logo" style={{ height: '30px', marginRight: '15px', filter: 'brightness(0) invert(1)' }} />
+          <Title level={4} style={{ color: 'white', margin: 0 }}>Voucher {id ? 'Alteration' : 'Creation'}</Title>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ backgroundColor: '#008080', padding: '2px 10px', marginRight: '20px', fontSize: '13px', fontWeight: 'bold' }}>
             Type: {VOUCHER_TYPE_NAMES[voucherType] || 'Journal'}

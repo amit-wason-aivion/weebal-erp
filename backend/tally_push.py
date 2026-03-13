@@ -1,7 +1,7 @@
 import requests
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import Session
-from .models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry, StockItem
+from .models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry, StockItem, StockBatch
 import datetime
 
 import os
@@ -58,21 +58,37 @@ def generate_voucher_xml(voucher_id: int, db: Session):
 
         led_entry = ET.SubElement(vch, "ALLLEDGERENTRIES.LIST")
         ET.SubElement(led_entry, "LEDGERNAME").text = ledger.name
-        ET.SubElement(led_entry, "ISDEEMEDPOSITIVE").text = "Yes" if entry.is_debit else "No"
+        ET.SubElement(led_entry, "ISDEEMEDPOSITIVE").text = "No" if entry.is_debit else "Yes"
         
-        # Tally treats Credits as positive and Debits as negative in its internal logic for ISDEEMEDPOSITIVE=No
-        # But for XML import, we usually send the amount as negative if it's a Credit? 
-        # Actually, Tally XML import: Debit is negative, Credit is positive.
+        # Tally XML: Debit is negative, Credit is positive
         amount = float(entry.amount)
         ET.SubElement(led_entry, "AMOUNT").text = f"-{amount}" if entry.is_debit else f"{amount}"
 
-    # Inventory Entries (for Sales Invoices)
-    for inv_item, stock_item in inventory:
-        # Note: In Tally, inventory entries are sub-lists under a ledger entry 
-        # (usually the Sales or Purchase ledger).
-        # For simplicity in this demo, we'll focus on the accounting entries sync.
-        # But if we were to do full inventory sync:
-        pass
+        # If this is the Sales/Purchase ledger, attach inventory
+        is_sales_ledger = "sales" in ledger.name.lower()
+        is_purchase_ledger = "purchase" in ledger.name.lower()
+        
+        if (is_sales_ledger or is_purchase_ledger) and inventory:
+            for inv_item, stock_item in inventory:
+                # Ensure we only attach to the correct side (Outward for Sales, Inward for Purchase)
+                if (is_sales_ledger and not inv_item.is_inward) or (is_purchase_ledger and inv_item.is_inward):
+                    inv_entry = ET.SubElement(led_entry, "INVENTORYENTRIES.LIST")
+                    ET.SubElement(inv_entry, "STOCKITEMNAME").text = stock_item.name
+                    ET.SubElement(inv_entry, "ISDEEMEDPOSITIVE").text = "No" if is_sales_ledger else "Yes"
+                    ET.SubElement(inv_entry, "RATE").text = f"{inv_item.rate}"
+                    ET.SubElement(inv_entry, "AMOUNT").text = f"{inv_item.amount}" if is_sales_ledger else f"-{inv_item.amount}"
+                    ET.SubElement(inv_entry, "ACTUALQTY").text = f"{inv_item.quantity} {stock_item.main_unit_name or 'Nos'}"
+                    ET.SubElement(inv_entry, "BILLEDQTY").text = f"{inv_item.quantity} {stock_item.main_unit_name or 'Nos'}"
+                    
+                    # Pharma Batch Details
+                    if inv_item.batch_id:
+                        batch = db.query(StockBatch).filter(StockBatch.id == inv_item.batch_id).first()
+                        if batch:
+                            batch_entry = ET.SubElement(inv_entry, "BATCHALLOCATIONS.LIST")
+                            ET.SubElement(batch_entry, "BATCHNAME").text = batch.batch_no
+                            ET.SubElement(batch_entry, "AMOUNT").text = f"{inv_item.amount}" if is_sales_ledger else f"-{inv_item.amount}"
+                            ET.SubElement(batch_entry, "ACTUALQTY").text = f"{inv_item.quantity} {stock_item.main_unit_name or 'Nos'}"
+                            ET.SubElement(batch_entry, "BILLEDQTY").text = f"{inv_item.quantity} {stock_item.main_unit_name or 'Nos'}"
 
     return ET.tostring(xml_root, encoding="unicode")
 

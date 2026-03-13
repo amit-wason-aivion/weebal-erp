@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Drawer, Form, Input, Select, InputNumber, Switch, Space, Typography, message, Card, Tabs, Modal } from 'antd';
+import { Table, Button, Form, Input, Select, Space, Typography, message, Card, Tabs, Modal } from 'antd';
 import { PlusOutlined, SearchOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { useCompany } from '../context/CompanyContext';
+import LedgerDrawer from './LedgerDrawer';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -17,7 +18,7 @@ const AccountsInfo = () => {
     const [groupModalVisible, setGroupModalVisible] = useState(false);
     const [ledgerSearchText, setLedgerSearchText] = useState('');
     const [groupSearchText, setGroupSearchText] = useState('');
-    const [ledgerForm] = Form.useForm();
+    const [editingLedger, setEditingLedger] = useState(null);
     const [groupForm] = Form.useForm();
     const navigate = useNavigate();
 
@@ -41,23 +42,6 @@ const AccountsInfo = () => {
             setGroups(groupRes.data);
         } catch (error) {
             message.error("Failed to fetch data");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCreateLedger = async (values) => {
-        setLoading(true);
-        try {
-            // Include company_id in values if Superadmin
-            const payload = { ...values, company_id: activeCompany?.id };
-            await axios.post('/api/ledgers', payload);
-            message.success("Ledger created successfully");
-            setLedgerDrawerVisible(false);
-            ledgerForm.resetFields();
-            fetchData();
-        } catch (error) {
-            message.error(error.response?.data?.detail || "Failed to create ledger");
         } finally {
             setLoading(false);
         }
@@ -105,6 +89,31 @@ const AccountsInfo = () => {
                     {val.toLocaleString('en-IN', { minimumFractionDigits: 2 })} {record.is_debit_balance ? 'Dr' : 'Cr'}
                 </Text>
             )
+        },
+        {
+            title: 'GSTIN',
+            dataIndex: 'gstin',
+            key: 'gstin',
+            width: 150,
+            render: (text) => text || '-'
+        },
+        {
+            title: 'Actions',
+            key: 'actions',
+            width: 80,
+            render: (_, record) => (
+                <Button 
+                    type="link" 
+                    size="small" 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingLedger(record);
+                        setLedgerDrawerVisible(true);
+                    }}
+                >
+                    Edit
+                </Button>
+            )
         }
     ];
 
@@ -124,11 +133,11 @@ const AccountsInfo = () => {
         }
     ];
 
-    const filteredLedgers = ledgers.filter(l => 
+    const filteredLedgers = ledgers.filter(l =>
         l.name.toLowerCase().includes(ledgerSearchText.toLowerCase())
     );
 
-    const filteredGroups = groups.filter(g => 
+    const filteredGroups = groups.filter(g =>
         g.name.toLowerCase().includes(groupSearchText.toLowerCase())
     );
 
@@ -138,9 +147,9 @@ const AccountsInfo = () => {
                 <Title level={4} style={{ margin: 0, color: '#008080' }}>{title} ({count})</Title>
             </Space>
             <Space>
-                <Input 
-                    placeholder={searchPlaceholder} 
-                    prefix={<SearchOutlined />} 
+                <Input
+                    placeholder={searchPlaceholder}
+                    prefix={<SearchOutlined />}
                     onChange={e => onSearchChange(e.target.value)}
                     style={{ width: 250 }}
                 />
@@ -151,17 +160,20 @@ const AccountsInfo = () => {
         </div>
     );
 
-    const items = [
+    const tabItems = [
         {
             key: '1',
             label: 'Ledgers',
             children: (
                 <>
-                    {renderHeader("Ledgers", filteredLedgers.length, "Search Ledgers...", setLedgerSearchText, () => setLedgerDrawerVisible(true), "Create Ledger")}
-                    <Table 
-                        dataSource={filteredLedgers} 
-                        columns={ledgerColumns} 
-                        rowKey="id" 
+                    {renderHeader("Ledgers", filteredLedgers.length, "Search Ledgers...", setLedgerSearchText, () => {
+                        setEditingLedger(null);
+                        setLedgerDrawerVisible(true);
+                    }, "Create Ledger")}
+                    <Table
+                        dataSource={filteredLedgers}
+                        columns={ledgerColumns}
+                        rowKey="id"
                         loading={loading}
                         pagination={{ pageSize: 12 }}
                         size="small"
@@ -179,10 +191,10 @@ const AccountsInfo = () => {
             children: (
                 <>
                     {renderHeader("Groups", filteredGroups.length, "Search Groups...", setGroupSearchText, () => setGroupModalVisible(true), "Create Group")}
-                    <Table 
-                        dataSource={filteredGroups} 
-                        columns={groupColumns} 
-                        rowKey="id" 
+                    <Table
+                        dataSource={filteredGroups}
+                        columns={groupColumns}
+                        rowKey="id"
                         loading={loading}
                         pagination={{ pageSize: 12 }}
                         size="small"
@@ -199,54 +211,25 @@ const AccountsInfo = () => {
                 <div style={{ marginBottom: 20 }}>
                     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/')} type="text">Back to Gateway</Button>
                 </div>
-                
-                <Tabs 
-                    defaultActiveKey="1" 
-                    items={items} 
+
+                <Tabs
+                    defaultActiveKey="1"
+                    items={tabItems}
                     type="card"
                     style={{ marginTop: 10 }}
                 />
             </Card>
 
-            {/* Create Ledger Drawer */}
-            <Drawer
-                title="Create New Ledger"
-                width={400}
-                onClose={() => setLedgerDrawerVisible(false)}
-                open={ledgerDrawerVisible}
-            >
-                <Form form={ledgerForm} layout="vertical" onFinish={handleCreateLedger} initialValues={{ is_debit_balance: true, opening_balance: 0 }}>
-                    <Form.Item name="name" label="Ledger Name" rules={[{ required: true, message: 'Please enter ledger name' }]}>
-                        <Input placeholder="e.g. Sales A/c, HDFC Bank" />
-                    </Form.Item>
-
-                    <Form.Item name="group_id" label="Under (Group)" rules={[{ required: true, message: 'Please select a group' }]}>
-                        <Select showSearch placeholder="Select a parent group" filterOption={(input, option) => option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}>
-                            {groups.map(g => <Option key={g.id} value={g.id}>{g.name}</Option>)}
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item label="Opening Balance">
-                        <Space>
-                            <Form.Item name="opening_balance" noStyle>
-                                <InputNumber min={0} style={{ width: 200 }} precision={2} />
-                            </Form.Item>
-                            <Form.Item name="is_debit_balance" valuePropName="checked" noStyle>
-                                <Switch checkedChildren="Dr" unCheckedChildren="Cr" />
-                            </Form.Item>
-                        </Space>
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                            <Button onClick={() => setLedgerDrawerVisible(false)}>Cancel</Button>
-                            <Button type="primary" htmlType="submit" loading={loading} style={{ backgroundColor: '#008080', borderColor: '#008080' }}>
-                                Create
-                            </Button>
-                        </Space>
-                    </Form.Item>
-                </Form>
-            </Drawer>
+            <LedgerDrawer 
+                visible={ledgerDrawerVisible}
+                onClose={() => {
+                    setLedgerDrawerVisible(false);
+                    setEditingLedger(null);
+                }}
+                editingLedger={editingLedger}
+                onSuccess={fetchData}
+                groups={groups}
+            />
 
             {/* Create Group Modal */}
             <Modal
