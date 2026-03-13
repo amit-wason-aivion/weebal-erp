@@ -287,6 +287,15 @@ def get_vouchers(db: Session = Depends(get_db), company_id: int = Depends(get_cu
         })
     return result
 
+@app.get("/api/auth/whoami")
+async def whoami(current_user: User = Depends(get_current_user)):
+    return {
+        "username": current_user.username,
+        "role": current_user.role,
+        "normalized_role": (current_user.role or "").lower().strip(),
+        "company_id": current_user.company_id
+    }
+
 @app.get("/api/companies")
 def get_companies(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Superadmins can see all companies, Admins/Users only see their own
