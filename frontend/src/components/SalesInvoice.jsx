@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useCompany } from '../context/CompanyContext';
 import axios from '../api/axios';
 import dayjs from 'dayjs';
+import LedgerDrawer from './LedgerDrawer';
+import { PlusOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -38,18 +40,34 @@ const numberToWords = (num) => {
     
     return `Rupees ${whole}${fraction ? 'and ' + fraction + 'Paise ' : ''}Only`;
 };
+
+const normalizeLedgerId = (value) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    const normalized = Number(value);
+    return Number.isNaN(normalized) ? value : normalized;
+};
+
+const toSelectLedgerValue = (value) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    return String(value);
+};
+
 const SalesInvoice = () => {
   const [form] = Form.useForm();
   const { companyType, activeCompany } = useCompany();
   const isPharma = companyType === 'PHARMA';
   
   const [ledgers, setLedgers] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [stockItems, setStockItems] = useState([]);
   const [batchesMap, setBatchesMap] = useState({}); // {stock_item_id: [batches]}
+  const [ledgerDrawerVisible, setLedgerDrawerVisible] = useState(false);
+  const [initialGroupId, setInitialGroupId] = useState(null);
   const [items, setItems] = useState([
     { key: 0, stock_item_id: null, batch_id: null, quantity: 1, unit_type: 'main', rate: 0, amount: 0, gst_rate: 0 }
   ]);
   const [isInterstate, setIsInterstate] = useState(false);
+  const [isLUT, setIsLUT] = useState(false);
   
   // Substitute Search Modal
   const [subModalVisible, setSubModalVisible] = useState(false);
@@ -58,7 +76,7 @@ const SalesInvoice = () => {
 
   // Watch party selection for address info
   const selectedPartyId = Form.useWatch('party_ledger_id', form);
-  const selectedParty = ledgers.find(l => l.id === selectedPartyId);
+  const selectedParty = ledgers.find(l => String(l.id) === String(selectedPartyId));
   
   const navigate = useNavigate();
   const { id } = useParams();
@@ -66,13 +84,11 @@ const SalesInvoice = () => {
   // GST Calculation Logic
   const taxSummary = React.useMemo(() => {
     const summary = {};
-    const isInter = selectedParty && activeCompany && 
-                    selectedParty.state?.toLowerCase().trim() !== activeCompany.state?.toLowerCase().trim();
-    
-    // Auto-sync isInterstate toggle for visual confirmation
-    if (selectedParty && activeCompany && isInter !== isInterstate) {
-        setIsInterstate(isInter);
-    }
+    // Pure calculation without side-effects
+    const isInter = selectedParty && activeCompany && (
+                    selectedParty.state?.toLowerCase().trim() !== activeCompany.state?.toLowerCase().trim() ||
+                    (selectedParty.country && selectedParty.country !== 'India')
+    );
 
     items.forEach(item => {
       const stockItem = stockItems.find(s => s.id === item.stock_item_id);
@@ -96,7 +112,24 @@ const SalesInvoice = () => {
     });
 
     return Object.values(summary);
-  }, [items, selectedParty, activeCompany, stockItems]);
+  }, [items, selectedParty, activeCompany, stockItems, isLUT]);
+
+  // Dedicated Effect for taxation state sync based on party selection
+  useEffect(() => {
+    if (selectedParty && activeCompany) {
+        const isInter = selectedParty.state?.toLowerCase().trim() !== activeCompany.state?.toLowerCase().trim() ||
+                        (selectedParty.country && selectedParty.country !== 'India');
+        if (isInter !== isInterstate) {
+            setIsInterstate(isInter);
+        }
+        
+        // Auto-set LUT for foreign companies if no tax accounts are present normally
+        // But respect the state if already loaded from voucher
+        if (selectedParty.country && selectedParty.country !== 'India' && !id) {
+            setIsLUT(true);
+        }
+    }
+  }, [selectedPartyId, activeCompany?.id, id]);
 
   const grandTotal = items.reduce((sum, i) => sum + (Number(i.amount) || 0), 0) + 
                      taxSummary.reduce((sum, t) => sum + t.cgst + t.sgst + t.igst, 0);
@@ -112,45 +145,85 @@ const SalesInvoice = () => {
   };
 
   useEffect(() => {
-    // Fetch ledgers for Party
-    axios.get('/api/ledgers')
-      .then(res => setLedgers(res.data))
-      .catch(err => message.error("Failed to load ledgers"));
+    // Fetch ledgers and groups
+    const fetchMasters = async () => {
+      try {
+        const [ledgerRes, groupRes] = await Promise.all([
+          axios.get('/api/ledgers'),
+          axios.get('/api/groups')
+        ]);
+        setLedgers(ledgerRes.data);
+        setGroups(groupRes.data);
+      } catch (err) {
+        message.error("Failed to load masters");
+      }
+    };
+
+    fetchMasters();
 
     // Fetch stock items
     axios.get('/api/stock-items')
       .then(res => setStockItems(res.data))
-      .catch(err => message.error("Failed to load stock items"));
+      .catch(err => console.error("Failed to load stock items")); // Reduced noise
 
     // If ID exists, fetch existing invoice details
     if (id) {
        axios.get(`/api/vouchers/${id}`)
          .then(res => {
-            const v = res.data;
-            setIsInterstate(v.inventory.some(i => i.is_interstate) || false); // Simplify for now or check tax ledgers
-            // In a real app we'd explicitly store is_interstate in the voucher or metadata
-            // For now, we'll try to find the party ledger and place of supply
-            const partyEntry = v.entries.find(e => e.is_debit);
-            
-            form.setFieldsValue({
-              invoice_number: v.voucher_number,
-              date: dayjs(v.date),
-              party_ledger_id: partyEntry?.ledger_id,
-              place_of_supply: v.narration.replace("Sales Invoice to ", "")
-            });
+             const v = res.data;
+             // Identify Ledgers
+             let partyEntry = v.entries.find(e => e.group_name?.toLowerCase().includes('sundry debtors'));
+             let salesEntry = v.entries.find(e => e.group_name?.toLowerCase().includes('sales accounts'));
 
-            setItems(v.inventory.map((i, idx) => ({
-              key: idx,
-              stock_item_id: i.stock_item_id,
-              quantity: i.quantity,
-              rate: i.rate,
-              amount: i.amount,
-              gst_rate: i.gst_rate || 18 // Fallback
-            })));
+             if (!partyEntry) partyEntry = v.entries.find(e => e.is_debit);
+             if (!salesEntry) salesEntry = v.entries.find(e => !e.is_debit && e.ledger_id !== partyEntry?.ledger_id);
+             
+             const taxEntries = v.entries.filter(e => e.group_name?.toLowerCase().includes('duties & taxes'));
+
+             const isExport = partyEntry?.country && partyEntry.country !== 'India';
+             setIsInterstate(taxEntries.some(e => e.ledger_name?.toUpperCase().includes('IGST')) || !!isExport);
+             setIsLUT(isExport && taxEntries.length === 0);
+             
+             // Initial form value setup
+             form.setFieldsValue({
+               invoice_number: v.voucher_number || "",
+               date: dayjs(v.date),
+               party_ledger_id: toSelectLedgerValue(partyEntry?.ledger_id),
+               sales_ledger_id: toSelectLedgerValue(salesEntry?.ledger_id),
+               place_of_supply: partyEntry?.state || partyEntry?.country || "",
+               narration: v.narration || ""
+             });
+
+             setItems(v.inventory.map((i, idx) => ({
+               key: idx,
+               stock_item_id: i.stock_item_id,
+               quantity: i.quantity,
+               rate: i.rate,
+               amount: i.amount,
+               gst_rate: i.gst_rate
+             })))
          })
-         .catch(err => message.error("Failed to load sales invoice details"));
+         .catch(err => message.error("Failed to load invoice"));
     }
   }, [id, form]);
+
+  // Sync effect to ensure Select labels appear once ledgers reach the frontend
+  useEffect(() => {
+    if (id && ledgers.length > 0) {
+        // Use a small timeout to allow Antd internal state to settle after masters load
+        const timer = setTimeout(() => {
+            const pId = form.getFieldValue('party_ledger_id');
+            const sId = form.getFieldValue('sales_ledger_id');
+            if (pId || sId) {
+                form.setFieldsValue({
+                    party_ledger_id: toSelectLedgerValue(pId),
+                    sales_ledger_id: toSelectLedgerValue(sId)
+                });
+            }
+        }, 150);
+        return () => clearTimeout(timer);
+    }
+  }, [ledgers.length, id, form]);
 
   const handleItemChange = (key, field, value) => {
     const newItems = [...items];
@@ -209,6 +282,47 @@ const SalesInvoice = () => {
   const roundedTotal = Math.round(rawTotal);
   const roundOff = (roundedTotal - rawTotal).toFixed(2);
 
+  // Filtering Logic
+  const allowedBuyerGroups = ['sundry debtors', 'cash-in-hand', 'bank accounts', 'branch / divisions'];
+  const blockedGroups = ['salary expenses', 'duties & taxes', 'capital account', 'indirect expenses', 'indirect incomes', 'fixed assets'];
+
+   const filteredParties = React.useMemo(() => {
+    return ledgers.filter(l => {
+      // Always include currently selected value to ensure label display even if group doesn't match
+      if (l.id == selectedPartyId) return true;
+
+      const group = groups.find(g => g.id === l.group_id);
+      const groupName = group?.name?.toLowerCase() || "";
+      
+      const isAllowed = allowedBuyerGroups.some(ag => groupName.includes(ag));
+      const isBlocked = blockedGroups.some(bg => groupName.includes(bg));
+      return isAllowed && !isBlocked;
+    });
+   }, [ledgers, groups, selectedPartyId]);
+
+  const selectedSalesLedgerId = Form.useWatch('sales_ledger_id', form);
+  const filteredSalesLedgers = React.useMemo(() => {
+    return ledgers.filter(l => {
+        if (l.id == selectedSalesLedgerId) return true;
+        const group = groups.find(g => g.id === l.group_id);
+        const groupName = group?.name?.toLowerCase() || "";
+        return groupName.includes('sales accounts');
+    });
+  }, [ledgers, groups, selectedSalesLedgerId]);
+
+  const handleAddNewCustomer = () => {
+    const debtorGroup = groups.find(g => g.name.toLowerCase().includes('sundry debtors'));
+    if (debtorGroup) {
+      setInitialGroupId(debtorGroup.id);
+    }
+    setLedgerDrawerVisible(true);
+  };
+
+  const handleLedgerSuccess = async () => {
+    const res = await axios.get('/api/ledgers');
+    setLedgers(res.data);
+  };
+
   const handleSubmit = async (values) => {
     const validItems = items.filter(i => i.stock_item_id && i.amount > 0);
     if (validItems.length === 0) {
@@ -216,20 +330,15 @@ const SalesInvoice = () => {
       return;
     }
 
-    // Attempt to find a Sales Ledger ID, assuming it usually exists
-    const salesLedger = ledgers.find(l => l.name.toLowerCase().includes('sales'));
-    if (!salesLedger) {
-       message.error("Could not find a 'Sales' ledger. Please ensure one exists in the masters.");
-       return;
-    }
-
     const payload = {
-      party_ledger_id: values.party_ledger_id,
-      sales_ledger_id: salesLedger?.id,
+      party_ledger_id: normalizeLedgerId(values.party_ledger_id),
+      sales_ledger_id: normalizeLedgerId(values.sales_ledger_id),
       is_interstate: isInterstate,
+      is_lut: isLUT,
       date: values.date.format('YYYY-MM-DD'),
       voucher_number: values.invoice_number || 'AUTO',
       place_of_supply: values.place_of_supply,
+      narration: values.narration,
       items: validItems.map(i => {
         if (isPharma && !i.batch_id) {
             throw new Error(`Please select a batch for all items.`);
@@ -325,6 +434,7 @@ const SalesInvoice = () => {
                 <p><b>Invoice No:</b> ${values.invoice_number}</p>
                 <p><b>Date:</b> ${values.date?.format('DD-MMM-YYYY')}</p>
                 <p><b>Place of Supply:</b> ${values.place_of_supply || activeCompany?.state || 'Local'}</p>
+                ${isLUT ? '<p><b style="color: blue;">[Export under LUT]</b></p>' : ''}
               </div>
             </div>
 
@@ -340,7 +450,7 @@ const SalesInvoice = () => {
               <div class="address-box text-right">
                 <h3>Consignee / Shipping Address:</h3>
                 <p>${values.place_of_supply || 'Same as Billing'}</p>
-                <p>Transport / Dispatch: N/A</p>
+                <p><b>Narration:</b> ${values.narration || 'N/A'}</p>
               </div>
             </div>
 
@@ -453,7 +563,11 @@ const SalesInvoice = () => {
                     style={{ width: '100%' }}
                     placeholder="Select item..."
                 >
-                    {stockItems.map(s => <Option key={s.id} value={s.id}>{s.name} (GST: {s.gst_rate}%)</Option>)}
+                    {stockItems.map(s => (
+                        <Option key={s.id} value={s.id}>
+                            {s.name} (GST: {s.gst_rate}%)
+                        </Option>
+                    ))}
                 </Select>
                 {isPharma && selectedItem?.salt_composition && (
                     <Button 
@@ -585,21 +699,98 @@ const SalesInvoice = () => {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="party_ledger_id" label="Party A/c Name" rules={[{ required: true, message: 'Please select Party' }]}>
-                <Select showSearch optionFilterProp="children" placeholder="Select Customer/Party" onChange={() => form.validateFields(['party_ledger_id'])}>
-                  {ledgers.map(l => <Option key={l.id} value={l.id}>{l.name}</Option>)}
-                </Select>
-                {selectedParty && (selectedParty.address || selectedParty.gstin) && (
-                  <div style={{ marginTop: '5px', padding: '5px', backgroundColor: '#f0f0f0', border: '1px solid #d9d9d9', borderRadius: '4px', fontSize: '12px' }}>
-                    {selectedParty.address && <div><Text type="secondary">Address:</Text> {selectedParty.address}, {selectedParty.city}</div>}
-                    {selectedParty.gstin && <div><Text type="secondary">GSTIN:</Text> <Text strong color="blue">{selectedParty.gstin}</Text></div>}
+              <Form.Item label="Party A/c Name" required>
+                <Form.Item
+                  name="party_ledger_id"
+                  noStyle
+                  rules={[
+                    { required: true, message: 'Please select Party' },
+                    {
+                      validator: (_, value) => {
+                        if (!value) return Promise.resolve();
+                        const isValid = filteredParties.some(p => String(p.id) === String(value));
+                        if (!isValid) return Promise.reject(new Error('Selected ledger is not a valid Buyer account'));
+                        return Promise.resolve();
+                      }
+                    }
+                  ]}
+                >
+                  <Select 
+                    showSearch 
+                    optionFilterProp="children" 
+                    placeholder="Select Customer/Party" 
+                    onChange={() => form.validateFields(['party_ledger_id'])}
+                    notFoundContent={
+                      <div style={{ padding: '8px', textAlign: 'center' }}>
+                        <Text type="secondary" style={{ display: 'block', marginBottom: '8px' }}>No customer found</Text>
+                        <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAddNewCustomer} style={{ backgroundColor: '#008080' }}>
+                          Add New Customer
+                        </Button>
+                      </div>
+                    }
+                    dropdownRender={(menu) => (
+                      <>
+                        {menu}
+                        <Divider style={{ margin: '8px 0' }} />
+                        <Space style={{ padding: '0 8px 4px' }}>
+                          <Button type="link" size="small" icon={<PlusOutlined />} onClick={handleAddNewCustomer}>
+                            Add New Customer
+                          </Button>
+                        </Space>
+                      </>
+                    )}
+                  >
+                    {filteredParties.map(l => <Option key={l.id} value={String(l.id)}>{l.name}</Option>)}
+                  </Select>
+                </Form.Item>
+                {selectedParty && (selectedParty.address || selectedParty.gstin || (selectedParty.country && selectedParty.country !== 'India')) && (
+                  <div style={{ marginTop: '5px', padding: '10px', backgroundColor: '#f9f9f9', border: '1px dotted #008080', borderRadius: '4px', fontSize: '12px' }}>
+                    <Row gutter={8}>
+                      <Col span={24}>
+                        <Text type="secondary">Address:</Text> {selectedParty.address || 'N/A'}, {selectedParty.city || ''}
+                      </Col>
+                      <Col span={12}>
+                        {selectedParty.country && selectedParty.country !== 'India' ? (
+                          <Tag color="purple">Export: {selectedParty.country}</Tag>
+                        ) : (
+                          <Tag color="blue">Local: {selectedParty.state || activeCompany?.state}</Tag>
+                        )}
+                      </Col>
+                      <Col span={12} style={{ textAlign: 'right' }}>
+                        {selectedParty.gstin ? (
+                          <div><Text type="secondary">GSTIN:</Text> <Text strong style={{ color: '#1890ff' }}>{selectedParty.gstin}</Text></div>
+                        ) : selectedParty.iec_code ? (
+                          <div><Tag color="gold">IEC: {selectedParty.iec_code}</Tag></div>
+                        ) : null}
+                      </Col>
+                    </Row>
                   </div>
                 )}
               </Form.Item>
             </Col>
-            <Col span={4}>
+            <Col span={6}>
+              <Form.Item 
+                name="sales_ledger_id" 
+                label="Sales Ledger" 
+                rules={[{ required: true, message: 'Please select Sales Ledger' }]}
+              >
+                <Select 
+                  showSearch 
+                  optionFilterProp="children" 
+                  placeholder="Select Sales Account"
+                >
+                  {filteredSalesLedgers.map(l => <Option key={l.id} value={String(l.id)}>{l.name}</Option>)}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={5}>
               <Form.Item name="place_of_supply" label="Place of Supply">
-                <Input placeholder="State" />
+                <Input placeholder={selectedParty?.country !== 'India' ? "Country / Port" : "State"} />
+              </Form.Item>
+            </Col>
+            <Col span={7}>
+              <Form.Item name="narration" label="Narration / Remarks">
+                <Input placeholder="Invoice details..." />
               </Form.Item>
             </Col>
           </Row>
@@ -612,6 +803,16 @@ const SalesInvoice = () => {
                checked={isInterstate} 
                onChange={setIsInterstate} 
             />
+            <span style={{ marginLeft: '20px' }}>
+                <Text strong>Export Type: </Text>
+                <Switch 
+                   checkedChildren="Export under LUT (Zero GST)" 
+                   unCheckedChildren="Normal Export" 
+                   checked={isLUT} 
+                   onChange={setIsLUT}
+                   disabled={!isInterstate}
+                />
+            </span>
           </div>
 
           <Table 
@@ -710,6 +911,14 @@ const SalesInvoice = () => {
             ]}
         />
       </Modal>
+
+      <LedgerDrawer
+        visible={ledgerDrawerVisible}
+        onClose={() => setLedgerDrawerVisible(false)}
+        onSuccess={handleLedgerSuccess}
+        groups={groups}
+        initialGroupId={initialGroupId}
+      />
     </div>
   );
 };

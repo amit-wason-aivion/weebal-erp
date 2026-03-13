@@ -101,27 +101,25 @@ const Gateway = () => {
       message.error("Only administrators can export data.");
       return;
     }
-    const token = localStorage.getItem('token');
-    if (!token) {
-      message.error("Not authenticated");
-      return;
-    }
-    const url = `${axios.defaults.baseURL}/api/sync/export-app-data`;
     
     try {
-      const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-      const blob = await resp.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
+      // Use axios so our interceptors add Auth + X-Company-ID automatically
+      const resp = await axios.get('/api/sync/export-app-data', {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([resp.data]));
       const a = document.createElement('a');
       a.style.display = 'none';
-      a.href = downloadUrl;
+      a.href = url;
       a.download = `weebal_backup_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.json`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(downloadUrl);
+      window.URL.revokeObjectURL(url);
       message.success("Backup export started.");
     } catch (err) {
-      message.error("Export failed.");
+      console.error("Export error:", err);
+      message.error("Export failed. Please ensure you have a company selected.");
     }
   };
 

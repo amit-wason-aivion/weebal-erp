@@ -1194,3 +1194,1026 @@ Traceback (most recent call last):
 AttributeError: 'LedgerCreateSchema' object has no attribute 'account_no'
 
 ==================================================
+
+--- 2026-03-12 13:48:04.365502 ---
+URL: http://localhost:8000/api/ledgers
+Global Error Catch: ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 326, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 567, in get_ledgers
+    ledgers = db.query(Ledger).filter(Ledger.company_id == company_id).all()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+==================================================
+
+--- 2026-03-12 13:48:06.074267 ---
+URL: http://localhost:8000/api/ledgers
+Global Error Catch: ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 326, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 567, in get_ledgers
+    ledgers = db.query(Ledger).filter(Ledger.company_id == company_id).all()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+==================================================
+
+--- 2026-03-12 13:48:08.920005 ---
+URL: http://localhost:8000/api/ledgers
+Global Error Catch: ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 326, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 567, in get_ledgers
+    ledgers = db.query(Ledger).filter(Ledger.company_id == company_id).all()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+==================================================
+
+--- 2026-03-12 13:48:08.947760 ---
+URL: http://localhost:8000/api/ledgers
+Global Error Catch: ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 326, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 567, in get_ledgers
+    ledgers = db.query(Ledger).filter(Ledger.company_id == company_id).all()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column ledgers.country does not exist
+LINE 1: ...edgers_state, ledgers.pincode AS ledgers_pincode, ledgers.co...
+                                                             ^
+
+[SQL: SELECT ledgers.id AS ledgers_id, ledgers.name AS ledgers_name, ledgers.group_id AS ledgers_group_id, ledgers.company_id AS ledgers_company_id, ledgers.opening_balance AS ledgers_opening_balance, ledgers.is_debit_balance AS ledgers_is_debit_balance, ledgers.bill_by_bill_enabled AS ledgers_bill_by_bill_enabled, ledgers.address AS ledgers_address, ledgers.city AS ledgers_city, ledgers.state AS ledgers_state, ledgers.pincode AS ledgers_pincode, ledgers.country AS ledgers_country, ledgers.iec_code AS ledgers_iec_code, ledgers.gstin AS ledgers_gstin, ledgers.pan_no AS ledgers_pan_no, ledgers.drug_license_no AS ledgers_drug_license_no, ledgers.fssai_no AS ledgers_fssai_no, ledgers.phone AS ledgers_phone, ledgers.email AS ledgers_email, ledgers.tax_type AS ledgers_tax_type, ledgers.tax_percentage AS ledgers_tax_percentage, ledgers.tax_head AS ledgers_tax_head, ledgers.employee_id AS ledgers_employee_id, ledgers.designation AS ledgers_designation, ledgers.bank_name AS ledgers_bank_name, ledgers.account_no AS ledgers_account_no, ledgers.ifsc_code AS ledgers_ifsc_code, ledgers.primary_pan AS ledgers_primary_pan, ledgers.basic_pay AS ledgers_basic_pay, ledgers.da_pay AS ledgers_da_pay, ledgers.hra_pay AS ledgers_hra_pay, ledgers.other_allowances AS ledgers_other_allowances, ledgers.total_ctc AS ledgers_total_ctc, ledgers.monitoring_enabled AS ledgers_monitoring_enabled, ledgers.attendance_source AS ledgers_attendance_source, ledgers.shift_type AS ledgers_shift_type, ledgers.tally_guid AS ledgers_tally_guid, ledgers.alterid AS ledgers_alterid 
+FROM ledgers 
+WHERE ledgers.company_id = %(company_id_1)s]
+[parameters: {'company_id_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+==================================================
+
+--- 2026-03-12 13:51:18.754639 ---
+URL: http://localhost:8000/api/inventory/items
+Global Error Catch: IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (1, null, Services , null, 1, null, 18.00, null, null, 1, null, null, 0, f, f).
+
+[SQL: INSERT INTO stock_items (company_id, name, group_id, uom_id, hsn_sac, gst_rate, salt_composition, rack_number, main_unit_name, sub_unit_name, conversion_factor, min_stock_level, is_narcotic, is_h1) VALUES (%(company_id)s, %(name)s, %(group_id)s, %(uom_id)s, %(hsn_sac)s, %(gst_rate)s, %(salt_composition)s, %(rack_number)s, %(main_unit_name)s, %(sub_unit_name)s, %(conversion_factor)s, %(min_stock_level)s, %(is_narcotic)s, %(is_h1)s) RETURNING stock_items.id]
+[parameters: {'company_id': None, 'name': 'Services ', 'group_id': None, 'uom_id': 1, 'hsn_sac': None, 'gst_rate': Decimal('18.0'), 'salt_composition': None, 'rack_number': None, 'main_unit_name': None, 'sub_unit_name': None, 'conversion_factor': 1, 'min_stock_level': 0, 'is_narcotic': False, 'is_h1': False}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (1, null, Services , null, 1, null, 18.00, null, null, 1, null, null, 0, f, f).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 326, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 1300, in create_stock_item
+    db.commit()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (1, null, Services , null, 1, null, 18.00, null, null, 1, null, null, 0, f, f).
+
+[SQL: INSERT INTO stock_items (company_id, name, group_id, uom_id, hsn_sac, gst_rate, salt_composition, rack_number, main_unit_name, sub_unit_name, conversion_factor, min_stock_level, is_narcotic, is_h1) VALUES (%(company_id)s, %(name)s, %(group_id)s, %(uom_id)s, %(hsn_sac)s, %(gst_rate)s, %(salt_composition)s, %(rack_number)s, %(main_unit_name)s, %(sub_unit_name)s, %(conversion_factor)s, %(min_stock_level)s, %(is_narcotic)s, %(is_h1)s) RETURNING stock_items.id]
+[parameters: {'company_id': None, 'name': 'Services ', 'group_id': None, 'uom_id': 1, 'hsn_sac': None, 'gst_rate': Decimal('18.0'), 'salt_composition': None, 'rack_number': None, 'main_unit_name': None, 'sub_unit_name': None, 'conversion_factor': 1, 'min_stock_level': 0, 'is_narcotic': False, 'is_h1': False}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-12 13:51:51.704794 ---
+URL: http://localhost:8000/api/inventory/items
+Global Error Catch: IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (2, null, Services , null, 1, 9983, 18.00, null, null, 1, null, null, 0, f, f).
+
+[SQL: INSERT INTO stock_items (company_id, name, group_id, uom_id, hsn_sac, gst_rate, salt_composition, rack_number, main_unit_name, sub_unit_name, conversion_factor, min_stock_level, is_narcotic, is_h1) VALUES (%(company_id)s, %(name)s, %(group_id)s, %(uom_id)s, %(hsn_sac)s, %(gst_rate)s, %(salt_composition)s, %(rack_number)s, %(main_unit_name)s, %(sub_unit_name)s, %(conversion_factor)s, %(min_stock_level)s, %(is_narcotic)s, %(is_h1)s) RETURNING stock_items.id]
+[parameters: {'company_id': None, 'name': 'Services ', 'group_id': None, 'uom_id': 1, 'hsn_sac': '9983', 'gst_rate': Decimal('18.0'), 'salt_composition': None, 'rack_number': None, 'main_unit_name': None, 'sub_unit_name': None, 'conversion_factor': 1, 'min_stock_level': 0, 'is_narcotic': False, 'is_h1': False}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (2, null, Services , null, 1, 9983, 18.00, null, null, 1, null, null, 0, f, f).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 326, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 1300, in create_stock_item
+    db.commit()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (2, null, Services , null, 1, 9983, 18.00, null, null, 1, null, null, 0, f, f).
+
+[SQL: INSERT INTO stock_items (company_id, name, group_id, uom_id, hsn_sac, gst_rate, salt_composition, rack_number, main_unit_name, sub_unit_name, conversion_factor, min_stock_level, is_narcotic, is_h1) VALUES (%(company_id)s, %(name)s, %(group_id)s, %(uom_id)s, %(hsn_sac)s, %(gst_rate)s, %(salt_composition)s, %(rack_number)s, %(main_unit_name)s, %(sub_unit_name)s, %(conversion_factor)s, %(min_stock_level)s, %(is_narcotic)s, %(is_h1)s) RETURNING stock_items.id]
+[parameters: {'company_id': None, 'name': 'Services ', 'group_id': None, 'uom_id': 1, 'hsn_sac': '9983', 'gst_rate': Decimal('18.0'), 'salt_composition': None, 'rack_number': None, 'main_unit_name': None, 'sub_unit_name': None, 'conversion_factor': 1, 'min_stock_level': 0, 'is_narcotic': False, 'is_h1': False}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-12 14:41:32.199203 ---
+URL: http://localhost:8000/api/inventory/items
+Global Error Catch: IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (3, null, Services , null, 1, 9983, 18.00, null, null, 1, null, null, 0, f, f).
+
+[SQL: INSERT INTO stock_items (company_id, name, group_id, uom_id, hsn_sac, gst_rate, salt_composition, rack_number, main_unit_name, sub_unit_name, conversion_factor, min_stock_level, is_narcotic, is_h1) VALUES (%(company_id)s, %(name)s, %(group_id)s, %(uom_id)s, %(hsn_sac)s, %(gst_rate)s, %(salt_composition)s, %(rack_number)s, %(main_unit_name)s, %(sub_unit_name)s, %(conversion_factor)s, %(min_stock_level)s, %(is_narcotic)s, %(is_h1)s) RETURNING stock_items.id]
+[parameters: {'company_id': None, 'name': 'Services ', 'group_id': None, 'uom_id': 1, 'hsn_sac': '9983', 'gst_rate': Decimal('18.0'), 'salt_composition': None, 'rack_number': None, 'main_unit_name': None, 'sub_unit_name': None, 'conversion_factor': 1, 'min_stock_level': 0, 'is_narcotic': False, 'is_h1': False}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (3, null, Services , null, 1, 9983, 18.00, null, null, 1, null, null, 0, f, f).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 326, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 1300, in create_stock_item
+    db.commit()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1311, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1286, in _prepare_impl
+    self.session.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "company_id" of relation "stock_items" violates not-null constraint
+DETAIL:  Failing row contains (3, null, Services , null, 1, 9983, 18.00, null, null, 1, null, null, 0, f, f).
+
+[SQL: INSERT INTO stock_items (company_id, name, group_id, uom_id, hsn_sac, gst_rate, salt_composition, rack_number, main_unit_name, sub_unit_name, conversion_factor, min_stock_level, is_narcotic, is_h1) VALUES (%(company_id)s, %(name)s, %(group_id)s, %(uom_id)s, %(hsn_sac)s, %(gst_rate)s, %(salt_composition)s, %(rack_number)s, %(main_unit_name)s, %(sub_unit_name)s, %(conversion_factor)s, %(min_stock_level)s, %(is_narcotic)s, %(is_h1)s) RETURNING stock_items.id]
+[parameters: {'company_id': None, 'name': 'Services ', 'group_id': None, 'uom_id': 1, 'hsn_sac': '9983', 'gst_rate': Decimal('18.0'), 'salt_composition': None, 'rack_number': None, 'main_unit_name': None, 'sub_unit_name': None, 'conversion_factor': 1, 'min_stock_level': 0, 'is_narcotic': False, 'is_h1': False}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-12 18:30:03.605783 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: NameError: name 'InventoryEntry' is not defined
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 840, in upload_tally_xml
+    v_res = sync_vouchers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 367, in sync_vouchers_to_db
+    db.query(InventoryEntry).filter(InventoryEntry.voucher_id == existing.id).delete()
+             ^^^^^^^^^^^^^^
+NameError: name 'InventoryEntry' is not defined
+
+==================================================
+
+--- 2026-03-12 18:30:19.544633 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: NameError: name 'InventoryEntry' is not defined
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 840, in upload_tally_xml
+    v_res = sync_vouchers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 367, in sync_vouchers_to_db
+    db.query(InventoryEntry).filter(InventoryEntry.voucher_id == existing.id).delete()
+             ^^^^^^^^^^^^^^
+NameError: name 'InventoryEntry' is not defined
+
+==================================================

@@ -29,7 +29,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -77,8 +77,9 @@ def get_current_company(
     return effective_id
 
 def check_report_access(current_user: User = Depends(get_current_user)):
-    """Restricts access to 'Admin' and 'Viewer' roles only (excluding 'Operator')."""
-    if current_user.role not in ["Admin", "superadmin", "Viewer"]:
+    """Restricts access to 'Admin', 'superadmin', and 'Viewer' roles only."""
+    user_role = (current_user.role or "").lower()
+    if user_role not in ["admin", "superadmin", "viewer"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Access denied. Only Admins and Viewers can access reports."
@@ -87,7 +88,8 @@ def check_report_access(current_user: User = Depends(get_current_user)):
 
 def check_admin_access(current_user: User = Depends(get_current_user)):
     """Strictly for Company Admin or Global Superadmin."""
-    if current_user.role not in ["Admin", "superadmin"]:
+    user_role = (current_user.role or "").lower()
+    if user_role not in ["admin", "superadmin"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Admin access required for this operation."

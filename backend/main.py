@@ -116,6 +116,8 @@ class LedgerCreateSchema(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     pincode: Optional[str] = None
+    country: Optional[str] = "India"
+    iec_code: Optional[str] = None
     gstin: Optional[str] = None
     pan_no: Optional[str] = None
     drug_license_no: Optional[str] = None
@@ -182,6 +184,7 @@ class CompanyCreateSchema(BaseModel):
     telephone: Optional[str] = None
     email: Optional[str] = None
     gstin: Optional[str] = None
+    iec_code: Optional[str] = None
     drug_license_no: Optional[str] = None
     fssai_no: Optional[str] = None
     company_type: Optional[str] = "GENERAL"
@@ -287,7 +290,7 @@ def get_vouchers(db: Session = Depends(get_db), company_id: int = Depends(get_cu
 @app.get("/api/companies")
 def get_companies(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Superadmins can see all companies, Admins/Users only see their own
-    if current_user.role == "superadmin":
+    if (current_user.role or "").lower() == "superadmin":
         companies = db.query(Company).all()
     else:
         companies = db.query(Company).filter(Company.id == current_user.company_id).all()
@@ -303,6 +306,7 @@ def get_companies(db: Session = Depends(get_db), current_user: User = Depends(ge
             "telephone": c.telephone,
             "email": c.email,
             "gstin": c.gstin,
+            "iec_code": c.iec_code,
             "drug_license_no": c.drug_license_no,
             "fssai_no": c.fssai_no,
             "company_type": c.company_type,
@@ -491,7 +495,7 @@ def reconcile_vouchers(data: BulkReconcileSchema, db: Session = Depends(get_db))
 
 @app.get("/api/users")
 def get_users(company_id: Optional[int] = None, db: Session = Depends(get_db), current_user: User = Depends(check_admin_access)):
-    if current_user.role == "superadmin":
+    if (current_user.role or "").lower() == "superadmin":
         if company_id:
             users = db.query(User).filter(User.company_id == company_id).all()
         else:
@@ -518,7 +522,7 @@ def create_user(user_data: UserCreateSchema, db: Session = Depends(get_db), curr
         raise HTTPException(status_code=400, detail="Username already registered")
     # Determine company_id
     target_company_id = current_user.company_id
-    if current_user.role == "superadmin":
+    if (current_user.role or "").lower() == "superadmin":
         if not user_data.company_id and user_data.role != "superadmin":
              raise HTTPException(status_code=400, detail="company_id is required for tenant users")
         target_company_id = user_data.company_id
@@ -539,7 +543,7 @@ def create_user(user_data: UserCreateSchema, db: Session = Depends(get_db), curr
 
 @app.patch("/api/users/{user_id}")
 def update_user(user_id: int, updates: UserUpdateSchema, db: Session = Depends(get_db), current_user: User = Depends(check_admin_access)):
-    if current_user.role == "superadmin":
+    if (current_user.role or "").lower() == "superadmin":
         user = db.query(User).filter(User.id == user_id).first()
     else:
         user = db.query(User).filter(User.id == user_id, User.company_id == current_user.company_id).first()
@@ -577,6 +581,8 @@ def get_ledgers(db: Session = Depends(get_db), company_id: int = Depends(get_cur
             "city": l.city,
             "state": l.state,
             "pincode": l.pincode,
+            "country": l.country,
+            "iec_code": l.iec_code,
             "gstin": l.gstin,
             "pan_no": l.pan_no,
             "drug_license_no": l.drug_license_no,
@@ -623,6 +629,8 @@ def create_ledger(ledger: LedgerCreateSchema, db: Session = Depends(get_db), cur
         city=ledger.city,
         state=ledger.state,
         pincode=ledger.pincode,
+        country=ledger.country,
+        iec_code=ledger.iec_code,
         gstin=ledger.gstin,
         pan_no=ledger.pan_no,
         drug_license_no=ledger.drug_license_no,
@@ -678,6 +686,8 @@ def update_ledger(ledger_id: int, ledger_data: LedgerCreateSchema, db: Session =
     db_ledger.city = ledger_data.city
     db_ledger.state = ledger_data.state
     db_ledger.pincode = ledger_data.pincode
+    db_ledger.country = ledger_data.country
+    db_ledger.iec_code = ledger_data.iec_code
     db_ledger.gstin = ledger_data.gstin
     db_ledger.pan_no = ledger_data.pan_no
     db_ledger.drug_license_no = ledger_data.drug_license_no
@@ -1124,6 +1134,7 @@ def create_voucher(voucher: VoucherSchema, background_tasks: BackgroundTasks, db
     from decimal import Decimal
     
     # Calculate Total Dr and Cr
+    total_dr = sum([Decimal(str(e.amount)) for e in voucher.entries if e.is_debit])
     total_cr = sum([Decimal(str(e.amount)) for e in voucher.entries if not e.is_debit])
     
     if total_dr != total_cr:
@@ -1233,6 +1244,7 @@ class SalesInvoiceSchema(BaseModel):
     party_ledger_id: int
     sales_ledger_id: int
     is_interstate: bool      # True if Party is from a different state
+    is_lut: bool = False     # True if Export under LUT (Zero GST)
     date: date
     voucher_number: str
     place_of_supply: str = None
@@ -1261,19 +1273,19 @@ def get_stock_items(db: Session = Depends(get_db), company_id: int = Depends(get
     } for i in items]
 
 @app.post("/api/inventory/items")
-def create_stock_item(item: StockItemCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_stock_item(item: StockItemCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), company_id: int = Depends(get_current_company)):
     """Creates a new stock item."""
     if not current_user.can_manage_inventory:
          raise HTTPException(status_code=403, detail="Permission denied")
          
     from decimal import Decimal
-    db_item = db.query(StockItem).filter(StockItem.name == item.name, StockItem.company_id == current_user.company_id).first()
+    db_item = db.query(StockItem).filter(StockItem.name == item.name, StockItem.company_id == company_id).first()
     if db_item:
         raise HTTPException(status_code=400, detail="Stock Item already exists in this company")
     
     new_item = StockItem(
         name=item.name,
-        company_id=current_user.company_id,
+        company_id=company_id,
         hsn_sac=item.hsn_sac,
         gst_rate=Decimal(str(item.gst_rate)),
         uom_id=item.uom_id,
@@ -1367,7 +1379,7 @@ def create_sales_invoice(invoice: SalesInvoiceSchema, background_tasks: Backgrou
         total_igst = Decimal('0.0000')
         
         # 2. Inventory Impact
-        company = db.query(Company).filter(Company.id == current_user.company_id).first()
+        company = db.query(Company).filter(Company.id == company_id).first()
         is_pharma_company = company.company_type == 'PHARMA'
 
         for item in invoice.items:
@@ -1409,8 +1421,11 @@ def create_sales_invoice(invoice: SalesInvoiceSchema, background_tasks: Backgrou
             )
             db.add(inv_entry)
             
-            # Compute Taxes
-            tax_amount = amount * (Decimal(str(item.gst_rate)) / 100)
+            # Compute Taxes - Skip if LUT
+            tax_amount = Decimal('0.0000')
+            if not invoice.is_lut:
+                tax_amount = amount * (Decimal(str(item.gst_rate)) / 100)
+            
             if invoice.is_interstate:
                 total_igst += tax_amount
             else:
@@ -1422,15 +1437,15 @@ def create_sales_invoice(invoice: SalesInvoiceSchema, background_tasks: Backgrou
 
         # Create Ledger entries dynamically if tax ledgers don't exist for the sake of the demo
         def get_or_create_ledger(name, group_name="Duties & Taxes", is_debit=False):
-            ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == current_user.company_id).first()
+            ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == company_id).first()
             if not ledger:
                 from .models import TallyGroup
-                group = db.query(TallyGroup).filter(TallyGroup.name == group_name, TallyGroup.company_id == current_user.company_id).first()
+                group = db.query(TallyGroup).filter(TallyGroup.name == group_name, TallyGroup.company_id == company_id).first()
                 if not group:
-                    group = TallyGroup(name=group_name, company_id=current_user.company_id)
+                    group = TallyGroup(name=group_name, company_id=company_id)
                     db.add(group)
                     db.flush()
-                ledger = Ledger(name=name, group_id=group.id, company_id=current_user.company_id, is_debit_balance=is_debit)
+                ledger = Ledger(name=name, group_id=group.id, company_id=company_id, is_debit_balance=is_debit)
                 db.add(ledger)
                 db.flush()
             return ledger.id
@@ -1499,7 +1514,7 @@ def update_sales_invoice(id: int, invoice: SalesInvoiceSchema, background_tasks:
         total_igst = Decimal('0.0000')
 
         # 3. Inventory Re-Insertion
-        company = db.query(Company).filter(Company.id == current_user.company_id).first()
+        company = db.query(Company).filter(Company.id == company_id).first()
         is_pharma_company = company.company_type == 'PHARMA'
 
         for item in invoice.items:
@@ -1536,8 +1551,11 @@ def update_sales_invoice(id: int, invoice: SalesInvoiceSchema, background_tasks:
             )
             db.add(inv_entry)
             
-            # Re-compute Taxes
-            tax_amount = amount * (Decimal(str(item.gst_rate)) / 100)
+            # Re-compute Taxes - Skip if LUT
+            tax_amount = Decimal('0.0000')
+            if not invoice.is_lut:
+                tax_amount = amount * (Decimal(str(item.gst_rate)) / 100)
+            
             if invoice.is_interstate:
                 total_igst += tax_amount
             else:
@@ -1549,15 +1567,15 @@ def update_sales_invoice(id: int, invoice: SalesInvoiceSchema, background_tasks:
 
         # Reuse tax ledger helper (ensure they exist)
         def get_or_create_ledger(name, group_name="Duties & Taxes", is_debit=False):
-            ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == current_user.company_id).first()
+            ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == company_id).first()
             if not ledger:
                 from .models import TallyGroup
-                group = db.query(TallyGroup).filter(TallyGroup.name == group_name, TallyGroup.company_id == current_user.company_id).first()
+                group = db.query(TallyGroup).filter(TallyGroup.name == group_name, TallyGroup.company_id == company_id).first()
                 if not group:
-                    group = TallyGroup(name=group_name, company_id=current_user.company_id)
+                    group = TallyGroup(name=group_name, company_id=company_id)
                     db.add(group)
                     db.flush()
-                ledger = Ledger(name=name, group_id=group.id, company_id=current_user.company_id, is_debit_balance=is_debit)
+                ledger = Ledger(name=name, group_id=group.id, company_id=company_id, is_debit_balance=is_debit)
                 db.add(ledger)
                 db.flush()
             return ledger.id
@@ -1605,8 +1623,13 @@ def get_voucher(id: int, db: Session = Depends(get_db), company_id: int = Depend
 
     vtype = db.query(VoucherType).filter(VoucherType.id == voucher.voucher_type_id).first()
     
-    entries = db.query(VoucherEntry).filter(VoucherEntry.voucher_id == voucher.id).all()
+    entries = db.query(VoucherEntry, Ledger).join(Ledger).filter(VoucherEntry.voucher_id == voucher.id).all()
     inventory = db.query(InventoryEntry, StockItem).join(StockItem).filter(InventoryEntry.voucher_id == voucher.id).all()
+
+    from .models import TallyGroup
+    def get_group_name(group_id):
+        g = db.query(TallyGroup).filter(TallyGroup.id == group_id).first()
+        return g.name if g else ""
 
     return {
         "id": voucher.id,
@@ -1618,9 +1641,14 @@ def get_voucher(id: int, db: Session = Depends(get_db), company_id: int = Depend
         "entries": [
             {
                 "ledger_id": e.ledger_id,
+                "ledger_name": l.name,
+                "group_name": get_group_name(l.group_id),
                 "amount": float(e.amount),
-                "is_debit": e.is_debit
-            } for e in entries
+                "is_debit": e.is_debit,
+                "state": l.state,
+                "country": l.country,
+                "gstin": l.gstin
+            } for e, l in entries
         ],
         "inventory": [
             {
@@ -1629,10 +1657,32 @@ def get_voucher(id: int, db: Session = Depends(get_db), company_id: int = Depend
                 "quantity": float(i.quantity),
                 "rate": float(i.rate),
                 "amount": float(i.amount),
+                "gst_rate": float(s.gst_rate),
                 "is_inward": i.is_inward
             } for i, s in inventory
         ]
     }
+
+@app.delete("/api/vouchers/{id}")
+def delete_voucher(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), company_id: int = Depends(get_current_company)):
+    """Deletes a voucher and all its associated entries and inventory records."""
+    if not current_user.can_manage_vouchers:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    db_voucher = db.query(Voucher).filter(Voucher.id == id, Voucher.company_id == company_id).first()
+    if not db_voucher:
+        raise HTTPException(status_code=404, detail="Voucher not found in this company")
+
+    try:
+        # Atomic Cleanup: Associated entries and inventory will be deleted
+        db.query(VoucherEntry).filter(VoucherEntry.voucher_id == id).delete()
+        db.query(InventoryEntry).filter(InventoryEntry.voucher_id == id).delete()
+        db.delete(db_voucher)
+        db.commit()
+        return {"message": "Voucher deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete voucher: {str(e)}")
 
 # --- Phase 11: Drill-Down Engine & Day Book ---
 

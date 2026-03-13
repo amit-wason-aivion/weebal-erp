@@ -43,6 +43,8 @@ class Ledger(Base):
     city = Column(String, nullable=True)
     state = Column(String, nullable=True)
     pincode = Column(String, nullable=True)
+    country = Column(String, default="India")
+    iec_code = Column(String, nullable=True)
     gstin = Column(String, nullable=True)
     pan_no = Column(String, nullable=True)
     drug_license_no = Column(String, nullable=True)
@@ -258,6 +260,7 @@ class Company(Base):
     telephone = Column(String, nullable=True)
     email = Column(String, nullable=True)
     gstin = Column(String, nullable=True)
+    iec_code = Column(String, nullable=True)
     drug_license_no = Column(String, nullable=True)
     fssai_no = Column(String, nullable=True)
     company_type = Column(String, default="GENERAL") # 'GENERAL' or 'PHARMA'

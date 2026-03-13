@@ -18,7 +18,8 @@ def migrate():
             conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS enable_gst BOOLEAN DEFAULT TRUE"))
             conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS enable_tds BOOLEAN DEFAULT FALSE"))
             conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS enable_cost_centres BOOLEAN DEFAULT FALSE"))
-            print("Verified: companies branding and F11 features")
+            conn.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS iec_code VARCHAR"))
+            print("Verified: companies branding, F11 features, and IEC")
         except Exception as e:
             print(f"Skipping companies.company_type: {e}")
 
@@ -66,6 +67,9 @@ def migrate():
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS monitoring_enabled BOOLEAN DEFAULT FALSE"))
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS attendance_source VARCHAR"))
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS shift_type VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS country VARCHAR DEFAULT 'India'"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS iec_code VARCHAR"))
+            conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS account_no VARCHAR"))
             conn.execute(text("ALTER TABLE ledgers ADD COLUMN IF NOT EXISTS tally_guid VARCHAR"))
             
             # Create salary_history table

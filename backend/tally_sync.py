@@ -286,7 +286,7 @@ def sync_vouchers_to_db(db, company_id: int, xml_content=None):
     High-level function to sync vouchers from Tally to PostgreSQL.
     Accepts optional xml_content for file-based uploads.
     """
-    from .models import Voucher, VoucherEntry, Ledger, VoucherType
+    from .models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry
     from sqlalchemy.orm import Session
     from decimal import Decimal
     from datetime import datetime
@@ -351,19 +351,32 @@ def sync_vouchers_to_db(db, company_id: int, xml_content=None):
         existing.is_synced = True
         db.flush()
         
-        # 4. Handle Entries (All Ledgers list)
-        # Clear existing entries for this voucher if we are re-syncing
-        db.query(VoucherEntry).filter(VoucherEntry.voucher_id == existing.id).delete()
+        # 4. Handle Entries (Ledgers)
+        # Tally uses different tags depending on whether it's a 'simple' or 'complex' voucher
+        # Search for both ALLLEDGERENTRIES.LIST and LEDGERENTRIES.LIST
+        ledger_lists = vch_elem.findall('ALLLEDGERENTRIES.LIST') + vch_elem.findall('LEDGERENTRIES.LIST')
         
-        for ledger_entry in vch_elem.findall('ALLLEDGERENTRIES.LIST'):
+        # 5. Handle Inventory Entries
+        inventory_lists = vch_elem.findall('ALLINVENTORYENTRIES.LIST') + vch_elem.findall('INVENTORYENTRIES.LIST')
+
+        if not ledger_lists and not inventory_lists:
+            logging.warning(f"Voucher {vch_number} has no ledger or inventory entries. Skipping entries.")
+        
+        # Clear existing entries
+        db.query(VoucherEntry).filter(VoucherEntry.voucher_id == existing.id).delete()
+        db.query(InventoryEntry).filter(InventoryEntry.voucher_id == existing.id).delete()
+        
+        # Process Accounting Entries
+        # Track ledger entries to create virtual inventory for service-only vouchers later
+        added_ledger_entries = []
+        for ledger_entry in ledger_lists:
             ledger_name = ledger_entry.findtext('LEDGERNAME')
             amount_str = ledger_entry.findtext('AMOUNT')
             
-            # Find Ledger
+            if not ledger_name or not amount_str: continue
+
             ledger = db.query(Ledger).filter(Ledger.name == ledger_name, Ledger.company_id == company_id).first()
             if not ledger:
-                # Create a placeholder ledger if not found
-                # It's better to sync masters first, but this handles partial syncs
                 from .models import TallyGroup
                 suspense_group = db.query(TallyGroup).filter(TallyGroup.name == 'Suspense Accounts', TallyGroup.company_id == company_id).first()
                 if not suspense_group:
@@ -376,13 +389,85 @@ def sync_vouchers_to_db(db, company_id: int, xml_content=None):
             
             amt_val, is_debit = parse_tally_amount(amount_str)
             if amt_val != 0:
-                vch_entry = VoucherEntry(
+                ve = VoucherEntry(
                     voucher_id=existing.id,
                     ledger_id=ledger.id,
                     amount=Decimal(str(amt_val)),
                     is_debit=is_debit
                 )
-                db.add(vch_entry)
+                db.add(ve)
+                added_ledger_entries.append((ve, ledger))
+
+        # Process Inventory Entries
+        from .models import StockItem, UnitOfMeasure, InventoryEntry
+        for inv_item in inventory_lists:
+            item_name = inv_item.findtext('STOCKITEMNAME')
+            amount_str = inv_item.findtext('AMOUNT')
+            qty_str = inv_item.findtext('BILLEDQTY') or inv_item.findtext('ACTUALQTY')
+            rate_str = inv_item.findtext('RATE')
+            is_deemed_positive = inv_item.findtext('ISDEEMEDPOSITIVE') == "Yes"
+
+            if not item_name: continue
+
+            # Find or Create Stock Item
+            stock_item = db.query(StockItem).filter(StockItem.name == item_name, StockItem.company_id == company_id).first()
+            if not stock_item:
+                # Need a default UOM
+                uom = db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == company_id).first()
+                if not uom:
+                    uom = UnitOfMeasure(symbol="Nos", formal_name="Numbers", company_id=company_id)
+                    db.add(uom)
+                    db.flush()
+                stock_item = StockItem(name=item_name, company_id=company_id, uom_id=uom.id)
+                db.add(stock_item)
+                db.flush()
+
+            amt_val, _ = parse_tally_amount(amount_str)
+            rate_val, _ = parse_tally_amount(rate_str)
+            qty_val, _ = parse_tally_amount(qty_str)
+
+            if amt_val != 0:
+                db.add(InventoryEntry(
+                    voucher_id=existing.id,
+                    stock_item_id=stock_item.id,
+                    quantity=Decimal(str(qty_val)),
+                    rate=Decimal(str(rate_val)),
+                    amount=Decimal(str(amt_val)),
+                    is_inward=is_deemed_positive # In Tally, Positive deemed usually means Inward for Sales? Actually wait.
+                    # In Tally: Purchase is Inward (Positive), Sales is Outward (Negative).
+                    # But for now let's just use deemed positive as a proxy.
+                ))
+        
+        # Virtual Inventory for Service Invoices (Sales/Purchase with no items)
+        if not inventory_lists and vch_type_name and vch_type_name.upper() in ['SALES', 'PURCHASE']:
+            for ve, ldr in added_ledger_entries:
+                # Identify income/expense ledger (Credit for Sales, Debit for Purchase)
+                is_revenue = (vch_type_name.upper() == 'SALES' and not ve.is_debit)
+                is_expense = (vch_type_name.upper() == 'PURCHASE' and ve.is_debit)
+                
+                if is_revenue or is_expense:
+                    # Double check if it belongs to Sales/Purchase accounts to avoid taxes
+                    if ldr.group and ldr.group.name.lower() in ['sales accounts', 'purchase accounts']:
+                        # Create/Find Service item
+                        stock_item = db.query(StockItem).filter(StockItem.name == ldr.name, StockItem.company_id == company_id).first()
+                        if not stock_item:
+                            uom = db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == company_id).first()
+                            if not uom:
+                                uom = UnitOfMeasure(symbol="Nos", formal_name="Numbers", company_id=company_id)
+                                db.add(uom)
+                                db.flush()
+                            stock_item = StockItem(name=ldr.name, company_id=company_id, uom_id=uom.id)
+                            db.add(stock_item)
+                            db.flush()
+                        
+                        db.add(InventoryEntry(
+                            voucher_id=existing.id,
+                            stock_item_id=stock_item.id,
+                            quantity=Decimal('1'),
+                            rate=abs(ve.amount),
+                            amount=abs(ve.amount),
+                            is_inward=is_expense
+                        ))
         
         count += 1
         
