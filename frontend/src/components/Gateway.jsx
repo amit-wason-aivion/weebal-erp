@@ -21,8 +21,8 @@ const Gateway = () => {
   const username = localStorage.getItem('username');
 
   // RBAC Flags
-  const isSuper = role === 'superadmin';
-  const isAdmin = role === 'Admin';
+  const isSuper = role?.toLowerCase() === 'superadmin';
+  const isAdmin = role?.toLowerCase() === 'admin' || role?.toLowerCase() === 'administrator';
   const canManageMasters = permissions.masters || isSuper || isAdmin;
   const canManageVouchers = permissions.vouchers || isSuper || isAdmin;
   const canManageInventory = permissions.inventory || isSuper || isAdmin;

@@ -324,7 +324,8 @@ def get_companies(db: Session = Depends(get_db), current_user: User = Depends(ge
 def update_company(company_id: int, company_data: CompanyCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(check_admin_access)):
     """Allows updating company details (name, type, etc.). Restricted to company admins or superadmins."""
     # Ensure current user is authorized for THIS company
-    if current_user.role != "superadmin" and current_user.company_id != company_id:
+    # Ensure current user is authorized for THIS company
+    if (current_user.role or "").lower() != "superadmin" and current_user.company_id != company_id:
         raise HTTPException(status_code=403, detail="Not authorized to update this company")
     
     db_company = db.query(Company).filter(Company.id == company_id).first()
@@ -341,7 +342,7 @@ def update_company(company_id: int, company_data: CompanyCreateSchema, db: Sessi
 
 @app.post("/api/companies")
 def create_company(company_data: CompanyCreateSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if current_user.role != "superadmin":
+    if (current_user.role or "").lower() != "superadmin":
         raise HTTPException(status_code=403, detail="Only Superadmins can create companies")
     
     try:
@@ -364,7 +365,7 @@ def create_company(company_data: CompanyCreateSchema, db: Session = Depends(get_
 
 @app.post("/api/companies/{company_id}/split")
 def split_company(company_id: int, split_data: CompanySplitSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if current_user.role != "superadmin":
+    if (current_user.role or "").lower() != "superadmin":
         raise HTTPException(status_code=403, detail="Only Superadmins can split companies")
         
     source_company = db.query(Company).filter(Company.id == company_id).first()
@@ -523,7 +524,7 @@ def create_user(user_data: UserCreateSchema, db: Session = Depends(get_db), curr
     # Determine company_id
     target_company_id = current_user.company_id
     if (current_user.role or "").lower() == "superadmin":
-        if not user_data.company_id and user_data.role != "superadmin":
+        if not user_data.company_id and (user_data.role or "").lower() != "superadmin":
              raise HTTPException(status_code=400, detail="company_id is required for tenant users")
         target_company_id = user_data.company_id
     

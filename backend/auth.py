@@ -66,7 +66,7 @@ def get_current_company(
     user_role = (current_user.role or "").lower().strip()
     
     # If not a global role, strictly use assigned company_id
-    if user_role not in ["superadmin", "admin"]:
+    if user_role not in ["superadmin", "admin", "administrator"]:
         if not current_user.company_id:
             raise HTTPException(status_code=403, detail="User is not assigned to any company.")
         return current_user.company_id
@@ -81,9 +81,9 @@ def get_current_company(
     return effective_id
 
 def check_report_access(current_user: User = Depends(get_current_user)):
-    """Restricts access to 'Admin', 'superadmin', and 'Viewer' roles only."""
+    """Restricts access to 'Admin', 'superadmin', 'administrator', and 'Viewer' roles only."""
     user_role = (current_user.role or "").lower().strip()
-    if user_role not in ["admin", "superadmin", "viewer"]:
+    if user_role not in ["admin", "superadmin", "administrator", "viewer"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Access denied. Only Admins and Viewers can access reports."
@@ -93,7 +93,7 @@ def check_report_access(current_user: User = Depends(get_current_user)):
 def check_admin_access(current_user: User = Depends(get_current_user)):
     """Strictly for Company Admin or Global Superadmin."""
     user_role = (current_user.role or "").lower().strip()
-    if user_role not in ["admin", "superadmin"]:
+    if user_role not in ["admin", "superadmin", "administrator"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Admin access required"

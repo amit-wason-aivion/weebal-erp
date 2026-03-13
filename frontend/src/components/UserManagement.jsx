@@ -16,7 +16,7 @@ const UserManagement = () => {
     const navigate = useNavigate();
     
     const role = localStorage.getItem('role');
-    const isSuper = role === 'superadmin';
+    const isSuper = role?.toLowerCase() === 'superadmin';
 
     useEffect(() => {
         fetchUsers();
