@@ -1641,37 +1641,42 @@ def get_voucher(id: int, db: Session = Depends(get_db), company_id: int = Depend
         g = db.query(TallyGroup).filter(TallyGroup.id == group_id).first()
         return g.name if g else ""
 
-    return {
-        "id": voucher.id,
-        "voucher_type": vtype.name if vtype else "Unknown",
-        "voucher_type_id": voucher.voucher_type_id,
-        "voucher_number": voucher.voucher_number,
-        "date": voucher.date,
-        "narration": voucher.narration,
-        "entries": [
-            {
-                "ledger_id": e.ledger_id,
-                "ledger_name": l.name,
-                "group_name": get_group_name(l.group_id),
-                "amount": float(e.amount),
-                "is_debit": e.is_debit,
-                "state": l.state,
-                "country": l.country,
-                "gstin": l.gstin
-            } for e, l in entries
-        ],
-        "inventory": [
-            {
-                "stock_item_id": i.stock_item_id,
-                "stock_item_name": s.name,
-                "quantity": float(i.quantity),
-                "rate": float(i.rate),
-                "amount": float(i.amount),
-                "gst_rate": float(s.gst_rate),
-                "is_inward": i.is_inward
-            } for i, s in inventory
-        ]
-    }
+    try:
+        return {
+            "id": voucher.id,
+            "voucher_type": vtype.name if vtype else "Unknown",
+            "voucher_type_id": voucher.voucher_type_id,
+            "voucher_number": voucher.voucher_number,
+            "date": voucher.date,
+            "narration": voucher.narration,
+            "entries": [
+                {
+                    "ledger_id": e.ledger_id,
+                    "ledger_name": l.name,
+                    "group_name": get_group_name(l.group_id),
+                    "amount": float(e.amount),
+                    "is_debit": e.is_debit,
+                    "state": l.state,
+                    "country": l.country,
+                    "gstin": l.gstin
+                } for e, l in entries
+            ],
+            "inventory": [
+                {
+                    "stock_item_id": i.stock_item_id,
+                    "stock_item_name": s.name,
+                    "quantity": float(i.quantity) if i.quantity else 0.0,
+                    "rate": float(i.rate) if i.rate else 0.0,
+                    "amount": float(i.amount) if i.amount else 0.0,
+                    "gst_rate": float(s.gst_rate) if s.gst_rate else 0.0,
+                    "is_inward": i.is_inward
+                } for i, s in inventory
+            ]
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to serialize voucher: {str(e)}")
 
 @app.delete("/api/vouchers/{id}")
 def delete_voucher(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), company_id: int = Depends(get_current_company)):
