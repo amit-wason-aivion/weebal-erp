@@ -31,7 +31,7 @@ from datetime import date
 # Database setup moved to database.py
 from .database import engine, get_db, init_db
 from .tally_push import sync_voucher_to_tally
-from .auth import get_current_user, create_access_token, verify_password, get_password_hash, get_current_company, check_report_access, check_admin_access
+from .auth import get_current_user, create_access_token, verify_password, get_password_hash, get_current_company, check_report_access, check_admin_access, check_sync_access
 from .seeders import seed_default_accounts
 from contextlib import asynccontextmanager
 
@@ -788,7 +788,7 @@ def create_group(group: GroupCreateSchema, db: Session = Depends(get_db), curren
     return new_group
 
 @app.post("/api/sync/import-ledgers")
-def import_ledgers(db: Session = Depends(get_db), current_user: User = Depends(check_admin_access), company_id: int = Depends(get_current_company)):
+def import_ledgers(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Triggers sync of ledgers from Tally."""
     from tally_sync import sync_ledgers_to_db
     result = sync_ledgers_to_db(db, company_id=company_id)
@@ -797,7 +797,7 @@ def import_ledgers(db: Session = Depends(get_db), current_user: User = Depends(c
     return result
 
 @app.post("/api/sync/import-vouchers")
-def import_vouchers(db: Session = Depends(get_db), current_user: User = Depends(check_admin_access), company_id: int = Depends(get_current_company)):
+def import_vouchers(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Triggers sync of vouchers from Tally."""
     from tally_sync import sync_vouchers_to_db
     result = sync_vouchers_to_db(db, company_id=company_id)
@@ -816,7 +816,7 @@ class AppJSONEncoder(json.JSONEncoder):
         return super().default(obj)
 
 @app.post("/api/sync/upload-tally-xml")
-async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(check_admin_access), company_id: int = Depends(get_current_company)):
+async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Accepts a Tally XML file and syncs data to PostgreSQL."""
     print(f"DEBUG: upload_tally_xml reached. Filename: {file.filename}, User ID: {current_user.id}, Company ID: {company_id}")
     
@@ -855,7 +855,7 @@ async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(g
     }
 
 @app.get("/api/sync/export-app-data")
-def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(check_admin_access), company_id: int = Depends(get_current_company)):
+def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Exports all master and transaction data to a JSON backup."""
     
     from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company
@@ -892,7 +892,7 @@ def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(
     return FileResponse(filepath, media_type='application/json', filename=filename)
 
 @app.get("/api/sync/export-tally-xml")
-def export_tally_xml(db: Session = Depends(get_db), current_user: User = Depends(check_admin_access), company_id: int = Depends(get_current_company)):
+def export_tally_xml(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Generates and returns a bulk Tally XML export file."""
     
     from tally_export import generate_bulk_tally_xml
@@ -908,7 +908,7 @@ def export_tally_xml(db: Session = Depends(get_db), current_user: User = Depends
     )
 
 @app.post("/api/sync/tally/push-pending")
-def push_pending_vouchers(background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(check_admin_access), company_id: int = Depends(get_current_company)):
+def push_pending_vouchers(background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Triggers a background sync for all unsynced vouchers of the company."""
     from .models import Voucher
     from .tally_push import sync_voucher_to_tally
@@ -921,7 +921,7 @@ def push_pending_vouchers(background_tasks: BackgroundTasks, db: Session = Depen
     return {"message": f"Queued {len(vouchers)} vouchers for Tally synchronization."}
 
 @app.post("/api/sync/upload-app-json")
-async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(check_admin_access)):
+async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(check_sync_access)):
     """Restores data from an AIVION native JSON backup with optional overwrite."""
     
     content = await file.read()

@@ -625,3 +625,42 @@
 2026-03-12 18:34:54,251 - INFO - Processing voucher: 34 (GUID: eec14209-f9cd-491e-a51f-7724aa4018a0-00000093)
 2026-03-12 18:34:54,254 - INFO - Processing voucher: 35 (GUID: eec14209-f9cd-491e-a51f-7724aa4018a0-00000094)
 2026-03-12 18:34:54,254 - INFO - Processing voucher: 7 (GUID: eec14209-f9cd-491e-a51f-7724aa4018a0-00000095)
+2026-03-13 09:01:43,334 - INFO - sync_ledgers_to_db started. Company ID: 1. XML size: 474958
+2026-03-13 09:01:43,384 - INFO - Found 35 LEDGER elements in XML.
+2026-03-13 09:01:43,384 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-13 09:01:43,417 - INFO - Processing ledger: AIVION LTD - Foreign Co.
+2026-03-13 09:01:43,428 - INFO - Processing ledger: AMIT WASON - CAPITAL
+2026-03-13 09:01:43,428 - INFO - Processing ledger: AMIT WASON - IMPREST
+2026-03-13 09:01:43,436 - INFO - Processing ledger: Aniket Tripathi
+2026-03-13 09:01:43,442 - INFO - Processing ledger: Badal Rana
+2026-03-13 09:01:43,450 - INFO - Processing ledger: Bhanvi Lamba  And Associates
+2026-03-13 09:01:43,458 - INFO - Processing ledger: Cash
+2026-03-13 09:01:43,462 - INFO - Processing ledger: Chair
+2026-03-13 09:01:43,473 - INFO - Processing ledger: EPIC Fees
+2026-03-13 09:01:43,478 - INFO - Processing ledger: HDFC BANK
+2026-03-13 09:01:43,478 - INFO - Processing ledger: INPUT CGST 9%
+2026-03-13 09:01:43,486 - INFO - Processing ledger: INPUT SGST 9%
+2026-03-13 09:01:43,492 - INFO - Processing ledger: Kishor Das - Imprest
+2026-03-13 09:01:43,497 - INFO - Processing ledger: Laptop
+2026-03-13 09:01:43,500 - INFO - Processing ledger: Munish Dhall - Imprest
+2026-03-13 09:01:43,507 - INFO - Processing ledger: Office Expenses
+2026-03-13 09:01:43,515 - INFO - Processing ledger: Pragati Wason
+2026-03-13 09:01:43,521 - INFO - Processing ledger: Printing and Stationery
+2026-03-13 09:01:43,526 - INFO - Processing ledger: PROFESSIONAL CHARGES
+2026-03-13 09:01:43,529 - INFO - Processing ledger: Professional Fees
+2026-03-13 09:01:43,534 - INFO - Processing ledger: Professional Services - Export
+2026-03-13 09:01:43,536 - INFO - Processing ledger: Puneet Khurana
+2026-03-13 09:01:43,543 - INFO - Processing ledger: Raghav
+2026-03-13 09:01:43,546 - INFO - Processing ledger: Rashi
+2026-03-13 09:01:43,550 - INFO - Processing ledger: Salary & Wages
+2026-03-13 09:01:43,556 - INFO - Processing ledger: Sankalp
+2026-03-13 09:01:43,561 - INFO - Processing ledger: SBI BANK
+2026-03-13 09:01:43,567 - INFO - Processing ledger: Staff Welfare
+2026-03-13 09:01:43,573 - INFO - Processing ledger: SUSPENSE ACCOUNT
+2026-03-13 09:01:43,577 - INFO - Processing ledger: Telephone & Internet Charges
+2026-03-13 09:01:43,579 - INFO - Processing ledger: Travel Expenses
+2026-03-13 09:01:43,586 - INFO - Processing ledger: Vaibhav Malhotra
+2026-03-13 09:01:43,594 - INFO - Processing ledger: VIKAS SANJIV & ASSOCIATES
+2026-03-13 09:01:43,600 - INFO - Processing ledger: Yashika
+2026-03-13 09:01:43,786 - INFO - sync_vouchers_to_db started. Company ID: 1. XML size: 474958
+2026-03-13 09:01:43,786 - INFO - Found 0 VOUCHER elements in XML.

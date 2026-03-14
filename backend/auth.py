@@ -99,3 +99,15 @@ def check_admin_access(current_user: User = Depends(get_current_user)):
             detail=f"Admin access required. Current role: '{current_user.role}'"
         )
     return current_user
+
+def check_sync_access(current_user: User = Depends(get_current_user)):
+    """Allows Admin/Superadmin or users with master/voucher management permissions."""
+    user_role = (current_user.role or "").lower().strip()
+    if user_role in ["admin", "superadmin", "administrator"]:
+        return current_user
+    if current_user.can_manage_masters or current_user.can_manage_vouchers:
+        return current_user
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN, 
+        detail=f"Sync access denied. Current role '{current_user.role}' lacks permissions."
+    )
