@@ -89,7 +89,12 @@ jobs:
             # 3. Install your Python dependencies safely as the site user
             sudo -u weebalinfotech-accounts-api ./venv/bin/pip install -r backend/requirements.txt
             
-            # 4. Restart the CloudPanel App
+            # 4. Run Database Migrations
+            cd backend
+            sudo -u weebalinfotech-accounts-api ../venv/bin/alembic upgrade head
+            cd ..
+            
+            # 5. Restart the CloudPanel App
             clpctl python:restart --domainName=accounts-api.weebalinfotech.com
             echo "Deployment completed successfully!"
 

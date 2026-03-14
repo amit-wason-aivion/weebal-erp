@@ -9,3 +9,4 @@ python-jose[cryptography]
 passlib[cryptography]
 psycopg2-binary
 requests
+alembic
