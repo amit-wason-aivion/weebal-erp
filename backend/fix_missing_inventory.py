@@ -1,6 +1,18 @@
-from .database import SessionLocal
-from .models import Voucher, VoucherEntry, InventoryEntry, VoucherType, TallyGroup, Ledger, StockItem, Company, UnitOfMeasure
+import sys
+import os
 import logging
+
+# Ensure the script can find local modules when run directly
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+try:
+    from database import SessionLocal
+    from models import Voucher, VoucherEntry, InventoryEntry, VoucherType, TallyGroup, Ledger, StockItem, Company, UnitOfMeasure
+except ImportError:
+    from .database import SessionLocal
+    from .models import Voucher, VoucherEntry, InventoryEntry, VoucherType, TallyGroup, Ledger, StockItem, Company, UnitOfMeasure
 
 logging.basicConfig(level=logging.INFO)
 

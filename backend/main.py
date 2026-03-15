@@ -71,6 +71,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.post("/api/admin/repair-vouchers")
+def trigger_repair_vouchers(db: Session = Depends(get_db)):
+    """Temporary endpoint to fix missing inventory entries for service invoices."""
+    try:
+        from .fix_missing_inventory import repair_vouchers
+        repair_vouchers()
+        return {"message": "Repair script executed successfully."}
+    except Exception as e:
+        import traceback
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Repair failed", "error": str(e), "traceback": traceback.format_exc()}
+        )
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     error_msg = f"Global Error Catch: {type(exc).__name__}: {str(exc)}\n{traceback.format_exc()}"
