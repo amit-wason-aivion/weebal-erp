@@ -233,6 +233,9 @@ class UserUpdateSchema(BaseModel):
     can_manage_inventory: Optional[bool] = None
     can_manage_masters: Optional[bool] = None
 
+class ResetDBRequest(BaseModel):
+    password: str
+
 @app.post("/api/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == form_data.username).first()
@@ -1013,6 +1016,37 @@ async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...),
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/admin/reset-db")
+def reset_database(request: ResetDBRequest, db: Session = Depends(get_db), current_user: User = Depends(check_admin_access)):
+    """
+    EMERGENCY: Erases all data and re-initializes schema.
+    Requires Superadmin role AND secret reset password from .env.
+    """
+    # 1. Check Role (Must be Superadmin)
+    if (current_user.role or "").lower() != "superadmin":
+         raise HTTPException(status_code=403, detail="Only Superadmins can trigger a system reset.")
+    
+    # 2. Check Secret Password
+    reset_password = os.getenv("ADMIN_RESET_PASSWORD")
+    if not reset_password or request.password != reset_password:
+        raise HTTPException(status_code=401, detail="Invalid reset password.")
+
+    try:
+        from .models import Base
+        from .database import engine, init_db
+        from .migrate_v2 import migrate
+        
+        # Drop everything
+        Base.metadata.drop_all(bind=engine)
+        
+        # Re-init
+        init_db()
+        migrate()
+        
+        return {"message": "Database reset completed successfully. System is now clean."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reset failed: {str(e)}")
 
 @app.get("/api/trial-balance")
 def get_trial_balance(db: Session = Depends(get_db), current_user: User = Depends(check_report_access), company_id: int = Depends(get_current_company)):

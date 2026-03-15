@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Button, Space, Typography, message, Divider, List, Tag, Alert, Upload, Row, Col, Checkbox, Modal } from 'antd';
-import { SyncOutlined, ArrowLeftOutlined, CloudDownloadOutlined, DatabaseOutlined, InboxOutlined, FileTextOutlined, CloudUploadOutlined } from '@ant-design/icons';
+import { Card, Button, Space, Typography, message, Divider, List, Tag, Alert, Upload, Row, Col, Checkbox, Modal, Input } from 'antd';
+import { SyncOutlined, ArrowLeftOutlined, CloudDownloadOutlined, DatabaseOutlined, InboxOutlined, FileTextOutlined, CloudUploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useCompany } from '../context/CompanyContext';
 import axios from '../api/axios';
@@ -13,8 +13,38 @@ const ImportData = () => {
     const [syncingTransactions, setSyncingTransactions] = useState(false);
     const [pushingPending, setPushingPending] = useState(false);
     const [overwrite, setOverwrite] = useState(false);
+    const [resetting, setResetting] = useState(false);
+    const [resetPassword, setResetPassword] = useState('');
+    const [resetModalVisible, setResetModalVisible] = useState(false);
     const navigate = useNavigate();
     const { activeCompany } = useCompany();
+
+    const role = localStorage.getItem('role')?.toLowerCase();
+    const isSuper = role === 'superadmin';
+
+    const handleSystemReset = async () => {
+        if (!resetPassword) {
+            message.error("Please enter the secret reset password");
+            return;
+        }
+
+        setResetting(true);
+        try {
+            const response = await axios.post('/api/admin/reset-db', { password: resetPassword });
+            message.success(response.data.message || "Database reset successfully");
+            setResetModalVisible(false);
+            setResetPassword('');
+            // Optional: Logout or redirect to gateway
+            setTimeout(() => {
+                localStorage.clear();
+                window.location.href = '/login';
+            }, 2000);
+        } catch (error) {
+            message.error(error.response?.data?.detail || "System reset failed. Check password.");
+        } finally {
+            setResetting(false);
+        }
+    };
 
     const handleSyncMasters = async () => {
         setSyncingMasters(true);
@@ -304,7 +334,56 @@ const ImportData = () => {
                         Note: Files are processed instantly using UPSERT logic.
                     </Text>
                 </div>
+
+                {isSuper && (
+                    <>
+                        <Divider orientation="left" style={{ borderColor: '#ff4d4f' }}>
+                            <Text type="danger"><DeleteOutlined /> Danger Zone</Text>
+                        </Divider>
+                        <div style={{ backgroundColor: '#fff2f0', border: '1px solid #ffccc7', padding: '15px', textAlign: 'center' }}>
+                            <Paragraph type="danger">
+                                <strong>System Reset:</strong> This will erase all companies, ledgers, and vouchers. This action cannot be undone.
+                            </Paragraph>
+                            <Button 
+                                danger 
+                                type="primary" 
+                                icon={<DeleteOutlined />} 
+                                onClick={() => setResetModalVisible(true)}
+                            >
+                                Reset Entire Database
+                            </Button>
+                        </div>
+                    </>
+                )}
             </Card>
+
+            <Modal
+                title="System Emergency Reset"
+                visible={resetModalVisible}
+                onOk={handleSystemReset}
+                onCancel={() => setResetModalVisible(false)}
+                okText="WIPE DATABASE"
+                okButtonProps={{ danger: true, loading: resetting }}
+                confirmLoading={resetting}
+            >
+                <div style={{ padding: '10px 0' }}>
+                    <Alert
+                        message="CRITICAL WARNING"
+                        description="You are about to wipe the entire production database. All current data will be LOST forever."
+                        type="error"
+                        showIcon
+                        style={{ marginBottom: '15px' }}
+                    />
+                    <Text strong>To confirm, please enter the Secret Reset Password:</Text>
+                    <Input.Password 
+                        placeholder="Enter secret reset password" 
+                        value={resetPassword}
+                        onChange={e => setResetPassword(e.target.value)}
+                        style={{ marginTop: '10px' }}
+                        onPressEnter={handleSystemReset}
+                    />
+                </div>
+            </Modal>
         </div>
     );
 };
