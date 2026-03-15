@@ -781,3 +781,39 @@
 2026-03-14 11:28:40,993 - INFO - Processing ledger: Yashika
 2026-03-14 11:28:41,005 - INFO - sync_vouchers_to_db started. Company ID: 1. XML size: 474958
 2026-03-14 11:28:41,005 - INFO - Found 0 VOUCHER elements in XML.
+2026-03-15 17:52:17,808 - INFO - sync_ledgers_to_db started. Company ID: 7. XML size: 474958
+2026-03-15 17:52:17,839 - INFO - Found 35 LEDGER elements in XML.
+2026-03-15 17:52:17,839 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-15 17:52:17,844 - INFO - Processing ledger: AIVION LTD - Foreign Co.
+2026-03-15 17:52:17,848 - INFO - Processing ledger: AMIT WASON - CAPITAL
+2026-03-15 17:52:17,850 - INFO - Processing ledger: AMIT WASON - IMPREST
+2026-03-15 17:52:17,853 - INFO - Processing ledger: Aniket Tripathi
+2026-03-15 17:52:17,854 - INFO - Processing ledger: Badal Rana
+2026-03-15 17:52:46,319 - INFO - sync_ledgers_to_db started. Company ID: 7. XML size: 474958
+2026-03-15 17:52:46,333 - INFO - Found 35 LEDGER elements in XML.
+2026-03-15 17:52:46,333 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-15 17:52:46,337 - INFO - Processing ledger: AIVION LTD - Foreign Co.
+2026-03-15 17:52:46,343 - INFO - Processing ledger: AMIT WASON - CAPITAL
+2026-03-15 17:52:46,349 - INFO - Processing ledger: AMIT WASON - IMPREST
+2026-03-15 17:52:46,353 - INFO - Processing ledger: Aniket Tripathi
+2026-03-15 17:52:46,356 - INFO - Processing ledger: Badal Rana
+2026-03-15 18:02:21,195 - INFO - sync_ledgers_to_db started. Company ID: 7. XML size: 474958
+2026-03-15 18:02:21,250 - INFO - Found 35 LEDGER elements in XML.
+2026-03-15 18:02:21,251 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-15 18:02:21,289 - INFO - Processing ledger: AIVION LTD - Foreign Co.
+2026-03-15 18:02:31,256 - INFO - sync_ledgers_to_db started. Company ID: 7. XML size: 474958
+2026-03-15 18:02:31,290 - INFO - Found 35 LEDGER elements in XML.
+2026-03-15 18:02:31,291 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-15 18:02:31,302 - INFO - Processing ledger: AIVION LTD - Foreign Co.
+2026-03-15 18:03:37,697 - INFO - sync_ledgers_to_db started. Company ID: 7. XML size: 474958
+2026-03-15 18:03:37,713 - INFO - Found 35 LEDGER elements in XML.
+2026-03-15 18:03:37,713 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-15 18:03:37,744 - INFO - Processing ledger: AIVION LTD - Foreign Co.
+2026-03-15 18:04:25,990 - INFO - sync_ledgers_to_db started. Company ID: 7. XML size: 474958
+2026-03-15 18:04:26,007 - INFO - Found 35 LEDGER elements in XML.
+2026-03-15 18:04:26,007 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-15 18:04:26,041 - INFO - Processing ledger: AIVION LTD - Foreign Co.
+2026-03-15 18:05:34,355 - INFO - sync_ledgers_to_db started. Company ID: 7. XML size: 474958
+2026-03-15 18:05:34,377 - INFO - Found 35 LEDGER elements in XML.
+2026-03-15 18:05:34,378 - INFO - Processing ledger: Profit & Loss A/c
+2026-03-15 18:05:34,408 - INFO - Processing ledger: AIVION LTD - Foreign Co.

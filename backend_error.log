@@ -2217,3 +2217,787 @@ Traceback (most recent call last):
 NameError: name 'InventoryEntry' is not defined
 
 ==================================================
+
+--- 2026-03-15 17:52:19.762328 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 206, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 855, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 206, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 85, in save_obj
+    _emit_update_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 912, in _emit_update_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 206, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-15 17:52:46.371324 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 208, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 855, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 206, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 85, in save_obj
+    _emit_update_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 912, in _emit_update_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 208, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-15 18:02:21.318283 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 210, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 855, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 272, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 85, in save_obj
+    _emit_update_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 912, in _emit_update_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 210, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-15 18:02:31.319776 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 211, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 855, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 272, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 85, in save_obj
+    _emit_update_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 912, in _emit_update_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 211, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-15 18:03:37.775711 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 212, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 855, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 272, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 85, in save_obj
+    _emit_update_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 912, in _emit_update_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 212, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-15 18:04:26.066711 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 213, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 855, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 272, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 85, in save_obj
+    _emit_update_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 912, in _emit_update_statements
+    c = connection.execute(
+        ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_ledgers_tally_guid"
+DETAIL:  Key (tally_guid)=(eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e) already exists.
+
+[SQL: UPDATE ledgers SET group_id=%(group_id)s, is_debit_balance=%(is_debit_balance)s, address=%(address)s, city=%(city)s, state=%(state)s, pincode=%(pincode)s, gstin=%(gstin)s, pan_no=%(pan_no)s, drug_license_no=%(drug_license_no)s, phone=%(phone)s, email=%(email)s, tally_guid=%(tally_guid)s, alterid=%(alterid)s WHERE ledgers.id = %(ledgers_id)s]
+[parameters: {'group_id': 213, 'is_debit_balance': True, 'address': '', 'city': '', 'state': '', 'pincode': '', 'gstin': '', 'pan_no': '', 'drug_license_no': '', 'phone': '', 'email': '', 'tally_guid': 'eec14209-f9cd-491e-a51f-7724aa4018a0-0000001e', 'alterid': 1134, 'ledgers_id': 51}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
+
+--- 2026-03-15 18:05:34.441364 ---
+URL: http://localhost:8000/api/sync/upload-tally-xml
+Global Error Catch: IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "group_id" of relation "ledgers" violates not-null constraint
+DETAIL:  Failing row contains (52, AIVION LTD - Foreign Co., null, 7, 0.0000, t, f, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, f, null, null, India, null).
+
+[SQL: INSERT INTO ledgers (name, group_id, company_id, opening_balance, is_debit_balance, bill_by_bill_enabled, address, city, state, pincode, country, iec_code, gstin, pan_no, drug_license_no, fssai_no, phone, email, tax_type, tax_percentage, tax_head, employee_id, designation, bank_name, account_no, ifsc_code, primary_pan, basic_pay, da_pay, hra_pay, other_allowances, total_ctc, monitoring_enabled, attendance_source, shift_type, tally_guid, alterid) VALUES (%(name)s, %(group_id)s, %(company_id)s, %(opening_balance)s, %(is_debit_balance)s, %(bill_by_bill_enabled)s, %(address)s, %(city)s, %(state)s, %(pincode)s, %(country)s, %(iec_code)s, %(gstin)s, %(pan_no)s, %(drug_license_no)s, %(fssai_no)s, %(phone)s, %(email)s, %(tax_type)s, %(tax_percentage)s, %(tax_head)s, %(employee_id)s, %(designation)s, %(bank_name)s, %(account_no)s, %(ifsc_code)s, %(primary_pan)s, %(basic_pay)s, %(da_pay)s, %(hra_pay)s, %(other_allowances)s, %(total_ctc)s, %(monitoring_enabled)s, %(attendance_source)s, %(shift_type)s, %(tally_guid)s, %(alterid)s) RETURNING ledgers.id]
+[parameters: {'name': 'AIVION LTD - Foreign Co.', 'group_id': None, 'company_id': 7, 'opening_balance': 0.0, 'is_debit_balance': True, 'bill_by_bill_enabled': False, 'address': None, 'city': None, 'state': None, 'pincode': None, 'country': 'India', 'iec_code': None, 'gstin': None, 'pan_no': None, 'drug_license_no': None, 'fssai_no': None, 'phone': None, 'email': None, 'tax_type': None, 'tax_percentage': None, 'tax_head': None, 'employee_id': None, 'designation': None, 'bank_name': None, 'account_no': None, 'ifsc_code': None, 'primary_pan': None, 'basic_pay': 0.0, 'da_pay': 0.0, 'hra_pay': 0.0, 'other_allowances': 0.0, 'total_ctc': 0.0, 'monitoring_enabled': False, 'attendance_source': None, 'shift_type': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.NotNullViolation: null value in column "group_id" of relation "ledgers" violates not-null constraint
+DETAIL:  Failing row contains (52, AIVION LTD - Foreign Co., null, 7, 0.0000, t, f, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, f, null, null, India, null).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 95, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\cors.py", line 153, in simple_response
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 130, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\amitw\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 222, in __aexit__
+    await self.gen.athrow(typ, value, traceback)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 37, in contextmanager_in_threadpool
+    raise e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\concurrency.py", line 29, in contextmanager_in_threadpool
+    yield await run_in_threadpool(cm.__enter__)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 116, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 670, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\fastapi\routing.py", line 324, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\main.py", line 855, in upload_tally_xml
+    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\tally_sync.py", line 272, in sync_ledgers_to_db
+    db.flush()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4331, in flush
+    self._flush(objects)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4466, in _flush
+    with util.safe_reraise():
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 4427, in _flush
+    flush_context.execute()
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Weebal\Accounts Software\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.NotNullViolation) null value in column "group_id" of relation "ledgers" violates not-null constraint
+DETAIL:  Failing row contains (52, AIVION LTD - Foreign Co., null, 7, 0.0000, t, f, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, f, null, null, India, null).
+
+[SQL: INSERT INTO ledgers (name, group_id, company_id, opening_balance, is_debit_balance, bill_by_bill_enabled, address, city, state, pincode, country, iec_code, gstin, pan_no, drug_license_no, fssai_no, phone, email, tax_type, tax_percentage, tax_head, employee_id, designation, bank_name, account_no, ifsc_code, primary_pan, basic_pay, da_pay, hra_pay, other_allowances, total_ctc, monitoring_enabled, attendance_source, shift_type, tally_guid, alterid) VALUES (%(name)s, %(group_id)s, %(company_id)s, %(opening_balance)s, %(is_debit_balance)s, %(bill_by_bill_enabled)s, %(address)s, %(city)s, %(state)s, %(pincode)s, %(country)s, %(iec_code)s, %(gstin)s, %(pan_no)s, %(drug_license_no)s, %(fssai_no)s, %(phone)s, %(email)s, %(tax_type)s, %(tax_percentage)s, %(tax_head)s, %(employee_id)s, %(designation)s, %(bank_name)s, %(account_no)s, %(ifsc_code)s, %(primary_pan)s, %(basic_pay)s, %(da_pay)s, %(hra_pay)s, %(other_allowances)s, %(total_ctc)s, %(monitoring_enabled)s, %(attendance_source)s, %(shift_type)s, %(tally_guid)s, %(alterid)s) RETURNING ledgers.id]
+[parameters: {'name': 'AIVION LTD - Foreign Co.', 'group_id': None, 'company_id': 7, 'opening_balance': 0.0, 'is_debit_balance': True, 'bill_by_bill_enabled': False, 'address': None, 'city': None, 'state': None, 'pincode': None, 'country': 'India', 'iec_code': None, 'gstin': None, 'pan_no': None, 'drug_license_no': None, 'fssai_no': None, 'phone': None, 'email': None, 'tax_type': None, 'tax_percentage': None, 'tax_head': None, 'employee_id': None, 'designation': None, 'bank_name': None, 'account_no': None, 'ifsc_code': None, 'primary_pan': None, 'basic_pay': 0.0, 'da_pay': 0.0, 'hra_pay': 0.0, 'other_allowances': 0.0, 'total_ctc': 0.0, 'monitoring_enabled': False, 'attendance_source': None, 'shift_type': None, 'tally_guid': None, 'alterid': None}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+==================================================
