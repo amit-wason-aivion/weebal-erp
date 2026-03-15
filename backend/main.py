@@ -863,6 +863,8 @@ async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(g
 @app.get("/api/sync/export-app-data")
 def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Exports all master and transaction data to a JSON backup."""
+    if not company_id:
+        raise HTTPException(status_code=400, detail="No active company selected. Please select a company before exporting.")
     
     from .models import TallyGroup, Ledger, Voucher, VoucherType, VoucherEntry, StockItem, UnitOfMeasure, Company, Godown, InventoryEntry
     
@@ -953,8 +955,16 @@ async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...),
                 db.add(new_company)
                 db.flush()
                 target_company_id = new_company.id
+                
+                # AUTO-ASSIGN if current user is admin and has no company context
+                if (current_user.role or "").lower() == "superadmin" and not current_user.company_id:
+                    current_user.company_id = target_company_id
+                    db.add(current_user)
             else:
                 target_company_id = existing_company.id
+                if not current_user.company_id:
+                    current_user.company_id = target_company_id
+                    db.add(current_user)
 
         # Mapping dictionaries
         voucher_type_map = {}
