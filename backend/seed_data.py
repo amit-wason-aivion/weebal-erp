@@ -8,7 +8,7 @@ from decimal import Decimal
 # Ensure relative imports resolve if run independently
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from models import Base, TallyGroup, Ledger, VoucherType, Voucher, VoucherEntry, UnitOfMeasure, StockGroup, StockItem, Godown, InventoryEntry
+from .models import Base, TallyGroup, Ledger, VoucherType, Voucher, VoucherEntry, UnitOfMeasure, StockGroup, StockItem, Godown, InventoryEntry
 
 from database import engine, SessionLocal, init_db
 

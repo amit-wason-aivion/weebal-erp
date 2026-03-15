@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from database import engine, SessionLocal
-from models import Company
+from .models import Company
 from seeders import seed_default_inventory
 
 def seed_existing():

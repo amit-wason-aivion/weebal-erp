@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import TallyGroup, Ledger, VoucherType, Company, UnitOfMeasure, Godown
+from .models import TallyGroup, Ledger, VoucherType, Company, UnitOfMeasure, Godown
 
 DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/aivion_erp"
 engine = create_engine(DATABASE_URL)

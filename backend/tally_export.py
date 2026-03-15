@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import Session
-from models import Ledger, Voucher, VoucherEntry, VoucherType, TallyGroup, StockItem, UnitOfMeasure
+from .models import Ledger, Voucher, VoucherEntry, VoucherType, TallyGroup, StockItem, UnitOfMeasure
 from datetime import datetime
 
 def generate_bulk_tally_xml(db: Session, company_id: int):

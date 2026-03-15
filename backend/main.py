@@ -796,7 +796,7 @@ def create_group(group: GroupCreateSchema, db: Session = Depends(get_db), curren
 @app.post("/api/sync/import-ledgers")
 def import_ledgers(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Triggers sync of ledgers from Tally."""
-    from tally_sync import sync_ledgers_to_db
+    from .tally_sync import sync_ledgers_to_db
     result = sync_ledgers_to_db(db, company_id=company_id)
     if "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
@@ -805,7 +805,7 @@ def import_ledgers(db: Session = Depends(get_db), current_user: User = Depends(c
 @app.post("/api/sync/import-vouchers")
 def import_vouchers(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Triggers sync of vouchers from Tally."""
-    from tally_sync import sync_vouchers_to_db
+    from .tally_sync import sync_vouchers_to_db
     result = sync_vouchers_to_db(db, company_id=company_id)
     if "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
@@ -911,7 +911,7 @@ def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(
 def export_tally_xml(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Generates and returns a bulk Tally XML export file."""
     
-    from tally_export import generate_bulk_tally_xml
+    from .tally_export import generate_bulk_tally_xml
     xml_content = generate_bulk_tally_xml(db, company_id=company_id)
     
     from fastapi import Response

@@ -1,7 +1,7 @@
 from database import get_db, SessionLocal
 from tally_push import generate_voucher_xml
 from sqlalchemy.orm import Session
-from models import Voucher
+from .models import Voucher
 
 def test_xml():
     db = SessionLocal()

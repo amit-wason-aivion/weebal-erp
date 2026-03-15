@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from database import engine, SessionLocal, SQLALCHEMY_DATABASE_URL
-from models import Base, User
+from .models import Base, User
 from auth import get_password_hash
 
 def setup_db():

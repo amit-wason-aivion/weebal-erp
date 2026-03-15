@@ -274,7 +274,12 @@ def sync_ledgers_to_db(db, company_id: int, xml_content=None):
         db_ledger.name = name
         db_ledger.group_id = group.id
         db_ledger.tally_guid = guid
-        db_ledger.alterid = int(alterid) if alterid else 0
+        try:
+            db_ledger.alterid = int(alterid) if alterid else 0
+        except (ValueError, TypeError):
+            db_ledger.alterid = 0
+            logging.warning(f"Invalid ALTERID '{alterid}' for ledger '{name}'. Defaulting to 0.")
+        
         db_ledger.opening_balance = Decimal(str(opening_bal))
         db_ledger.is_debit_balance = is_debit
         db_ledger.address = address
@@ -323,7 +328,11 @@ def sync_vouchers_to_db(db, company_id: int, xml_content=None):
         vch_number = vch_elem.findtext('VOUCHERNUMBER')
         guid = vch_elem.findtext('GUID')
         logging.info(f"Processing voucher: {vch_number} (GUID: {guid})")
-        alterid = int(vch_elem.findtext('ALTERID') or 0)
+        try:
+            alterid = int(vch_elem.findtext('ALTERID') or 0)
+        except (ValueError, TypeError):
+            alterid = 0
+            logging.warning(f"Invalid ALTERID for voucher {vch_number}. Defaulting to 0.")
         vch_type_name = vch_elem.findtext('VOUCHERTYPENAME')
         vch_date_str = vch_elem.findtext('DATE') # YYYYMMDD
         narration = vch_elem.findtext('NARRATION')
