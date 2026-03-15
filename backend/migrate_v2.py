@@ -113,6 +113,39 @@ def migrate():
         except Exception as e:
             print(f"Skipping users fields: {e}")
 
+        # 7. Fix Unique Constraints for Tally GUIDs (Per-Company)
+        try:
+            # Ledgers
+            conn.execute(text("ALTER TABLE ledgers DROP CONSTRAINT IF EXISTS ledgers_tally_guid_key"))
+            conn.execute(text("DROP INDEX IF EXISTS ix_ledgers_tally_guid"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS ix_ledgers_tally_guid ON ledgers (tally_guid)"))
+            conn.execute(text("ALTER TABLE ledgers DROP CONSTRAINT IF EXISTS _company_tally_ledger_guid_uc"))
+            conn.execute(text("ALTER TABLE ledgers ADD CONSTRAINT _company_tally_ledger_guid_uc UNIQUE (company_id, tally_guid)"))
+
+            # Tally Groups
+            conn.execute(text("ALTER TABLE tally_groups DROP CONSTRAINT IF EXISTS tally_groups_tally_guid_key"))
+            conn.execute(text("DROP INDEX IF EXISTS ix_tally_groups_tally_guid"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS ix_tally_groups_tally_guid ON tally_groups (tally_guid)"))
+            conn.execute(text("ALTER TABLE tally_groups DROP CONSTRAINT IF EXISTS _company_tally_group_guid_uc"))
+            conn.execute(text("ALTER TABLE tally_groups ADD CONSTRAINT _company_tally_group_guid_uc UNIQUE (company_id, tally_guid)"))
+
+            # Voucher Types
+            conn.execute(text("ALTER TABLE voucher_types DROP CONSTRAINT IF EXISTS voucher_types_tally_guid_key"))
+            conn.execute(text("DROP INDEX IF EXISTS ix_voucher_types_tally_guid"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS ix_voucher_types_tally_guid ON voucher_types (tally_guid)"))
+            conn.execute(text("ALTER TABLE voucher_types DROP CONSTRAINT IF EXISTS _company_tally_vtype_guid_uc"))
+            conn.execute(text("ALTER TABLE voucher_types ADD CONSTRAINT _company_tally_vtype_guid_uc UNIQUE (company_id, tally_guid)"))
+
+            # Vouchers
+            conn.execute(text("ALTER TABLE vouchers DROP CONSTRAINT IF EXISTS vouchers_tally_guid_key"))
+            conn.execute(text("DROP INDEX IF EXISTS ix_vouchers_tally_guid"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS ix_vouchers_tally_guid ON vouchers (tally_guid)"))
+            conn.execute(text("ALTER TABLE vouchers DROP CONSTRAINT IF EXISTS _company_tally_voucher_guid_uc"))
+            conn.execute(text("ALTER TABLE vouchers ADD CONSTRAINT _company_tally_voucher_guid_uc UNIQUE (company_id, tally_guid)"))
+            print("Verified: composite Tally GUID constraints")
+        except Exception as e:
+            print(f"Skipping unique constraints fix: {e}")
+
         conn.commit()
     
     print("V2 Database Migration completed successfully.")
