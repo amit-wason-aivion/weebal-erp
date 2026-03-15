@@ -939,7 +939,7 @@ async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...),
     except:
         raise HTTPException(status_code=400, detail="Invalid JSON file")
 
-    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company, Godown, InventoryEntry
+    from .models import TallyGroup, Ledger, Voucher, VoucherType, VoucherEntry, StockItem, UnitOfMeasure, Company, Godown, InventoryEntry
     
     try:
         # 1. Company Logic
