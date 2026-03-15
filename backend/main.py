@@ -851,9 +851,14 @@ async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(g
     xml_text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', xml_text)
     
     from .tally_sync import sync_ledgers_to_db, sync_vouchers_to_db
-    # Try syncing both as the file might contain both or just one
-    l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
-    v_res = sync_vouchers_to_db(db, company_id=company_id, xml_content=xml_text)
+    try:
+        # Try syncing both as the file might contain both or just one
+        l_res = sync_ledgers_to_db(db, company_id=company_id, xml_content=xml_text)
+        v_res = sync_vouchers_to_db(db, company_id=company_id, xml_content=xml_text)
+    except Exception as e:
+        if "ParseError" in str(e) or "not well-formed" in str(e):
+             raise HTTPException(status_code=400, detail="Invalid XML file: Not a valid Tally export format.")
+        raise e
     
     return {
         "ledgers": l_res.get("message", l_res.get("error")),
