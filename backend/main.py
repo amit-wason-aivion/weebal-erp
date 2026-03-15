@@ -55,8 +55,11 @@ load_dotenv()
 
 # Explicit CORS Origins
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+PROD_FRONTEND_URL = os.getenv("PROD_FRONTEND_URL", "https://accounts-erp.weebalinfotech.com")
 origins = [
     FRONTEND_URL,
+    PROD_FRONTEND_URL,
+    "http://localhost:5173",
     "http://localhost:8000",
 ]
 

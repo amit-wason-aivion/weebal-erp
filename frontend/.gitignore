@@ -30,3 +30,8 @@ out
 build
 *.tsbuildinfo
 .eslintcache
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
