@@ -103,6 +103,16 @@ def migrate():
         except Exception as e:
             print(f"Skipping voucher_entries banking fields: {e}")
 
+        # 6. Add Permission fields to users
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS can_view_reports BOOLEAN DEFAULT TRUE"))
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS can_manage_vouchers BOOLEAN DEFAULT TRUE"))
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS can_manage_inventory BOOLEAN DEFAULT TRUE"))
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS can_manage_masters BOOLEAN DEFAULT TRUE"))
+            print("Verified: users permission fields")
+        except Exception as e:
+            print(f"Skipping users fields: {e}")
+
         conn.commit()
     
     print("V2 Database Migration completed successfully.")
