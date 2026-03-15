@@ -864,12 +864,13 @@ async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(g
 def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Exports all master and transaction data to a JSON backup."""
     
-    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company, Godown, InventoryEntry
+    from .models import TallyGroup, Ledger, Voucher, VoucherType, VoucherEntry, StockItem, UnitOfMeasure, Company, Godown, InventoryEntry
     
     company = db.query(Company).filter(Company.id == company_id).first()
     
     data = {
         "company": vars(company) if company else None,
+        "voucher_types": [vars(vt) for vt in db.query(VoucherType).filter(VoucherType.company_id == company_id).all()],
         "groups": [vars(g) for g in db.query(TallyGroup).filter(TallyGroup.company_id == company_id).all()],
         "ledgers": [vars(l) for l in db.query(Ledger).filter(Ledger.company_id == company_id).all()],
         "vouchers": [vars(v) for v in db.query(Voucher).filter(Voucher.company_id == company_id).all()],
@@ -956,12 +957,26 @@ async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...),
                 target_company_id = existing_company.id
 
         # Mapping dictionaries
+        voucher_type_map = {}
         group_map = {}
         ledger_map = {}
         stock_item_map = {}
         uom_map = {}
         godown_map = {}
         voucher_map = {}
+
+        # 1.5 Import Voucher Types
+        for vt in data.get('voucher_types', []):
+            old_id = vt.get('id')
+            existing = db.query(VoucherType).filter(VoucherType.name == vt['name'], VoucherType.company_id == target_company_id).first()
+            if not existing:
+                new_vt = VoucherType(**{k:v for k,v in vt.items() if k not in ['id', '_sa_instance_state']})
+                new_vt.company_id = target_company_id
+                db.add(new_vt)
+                db.flush()
+                voucher_type_map[old_id] = new_vt.id
+            else:
+                voucher_type_map[old_id] = existing.id
 
         # 2. Import UOMs
         for u in data.get('uoms', []):
@@ -1053,8 +1068,10 @@ async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...),
             old_id = v.get('id')
             v_copy = {k:v for k,v in v.items() if k not in ['id', '_sa_instance_state']}
             v_copy['company_id'] = target_company_id
-            # Note: We assume VoucherTypes are correctly synced/existent or handled by migration.
-            # If they are in the JSON, we should map them too, but they are often system-level or synced from Tally.
+            
+            if v.get('voucher_type_id') in voucher_type_map:
+                v_copy['voucher_type_id'] = voucher_type_map[v['voucher_type_id']]
+                
             new_v = Voucher(**v_copy)
             db.add(new_v)
             db.flush()
