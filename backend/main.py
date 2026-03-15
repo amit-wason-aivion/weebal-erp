@@ -864,7 +864,7 @@ async def upload_tally_xml(file: UploadFile = File(...), db: Session = Depends(g
 def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(check_sync_access), company_id: int = Depends(get_current_company)):
     """Exports all master and transaction data to a JSON backup."""
     
-    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company
+    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company, Godown, InventoryEntry
     
     company = db.query(Company).filter(Company.id == company_id).first()
     
@@ -875,7 +875,9 @@ def export_app_data(db: Session = Depends(get_db), current_user: User = Depends(
         "vouchers": [vars(v) for v in db.query(Voucher).filter(Voucher.company_id == company_id).all()],
         "voucher_entries": [vars(ve) for ve in db.query(VoucherEntry).join(Voucher).filter(Voucher.company_id == company_id).all()],
         "stock_items": [vars(si) for si in db.query(StockItem).filter(StockItem.company_id == company_id).all()],
-        "uoms": [vars(u) for u in db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == company_id).all()]
+        "uoms": [vars(u) for u in db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == company_id).all()],
+        "godowns": [vars(g) for g in db.query(Godown).filter(Godown.company_id == company_id).all()],
+        "inventory_entries": [vars(ie) for ie in db.query(InventoryEntry).join(Voucher).filter(Voucher.company_id == company_id).all()]
     }
     
     # Remove SQLAlchemy state
@@ -936,7 +938,7 @@ async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...),
     except:
         raise HTTPException(status_code=400, detail="Invalid JSON file")
 
-    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company
+    from .models import TallyGroup, Ledger, Voucher, VoucherEntry, StockItem, UnitOfMeasure, Company, Godown, InventoryEntry
     
     try:
         # 1. Company Logic
@@ -946,75 +948,143 @@ async def upload_app_json(overwrite: bool = False, file: UploadFile = File(...),
             c_data.pop('_sa_instance_state', None)
             existing_company = db.query(Company).filter(Company.name == c_data['name']).first()
             if not existing_company:
-                new_company = Company(**c_data)
-                new_company.id = None # Let DB assign ID
+                new_company = Company(**{k:v for k,v in c_data.items() if k != 'id'})
                 db.add(new_company)
                 db.flush()
                 target_company_id = new_company.id
             else:
                 target_company_id = existing_company.id
 
-        # 2. Import Groups
-        for g_data in data.get('groups', []):
-            g_data.pop('_sa_instance_state', None)
-            existing = db.query(TallyGroup).filter(TallyGroup.name == g_data['name'], TallyGroup.company_id == target_company_id).first()
-            if existing:
-                if overwrite:
-                    for k, v in g_data.items():
-                        if k != 'id': setattr(existing, k, v)
-            else:
-                g_data.pop('id', None)
-                g_data['company_id'] = target_company_id
-                db.add(TallyGroup(**g_data))
-        db.flush()
+        # Mapping dictionaries
+        group_map = {}
+        ledger_map = {}
+        stock_item_map = {}
+        uom_map = {}
+        godown_map = {}
+        voucher_map = {}
 
-        # 3. Import Ledgers
-        for l_data in data.get('ledgers', []):
-            l_data.pop('_sa_instance_state', None)
-            existing = db.query(Ledger).filter(Ledger.name == l_data['name'], Ledger.company_id == target_company_id).first()
-            if existing:
-                if overwrite:
-                    for k, v in l_data.items():
-                        if k != 'id': setattr(existing, k, v)
-            else:
-                l_data.pop('id', None)
-                l_data['company_id'] = target_company_id
-                db.add(Ledger(**l_data))
-        db.flush()
-        
-        # 4. Import Stock Items
-        for si_data in data.get('stock_items', []):
-            si_data.pop('_sa_instance_state', None)
-            existing = db.query(StockItem).filter(StockItem.name == si_data['name'], StockItem.company_id == target_company_id).first()
-            if existing:
-                if overwrite:
-                    for k, v in si_data.items():
-                        if k != 'id': setattr(existing, k, v)
-            else:
-                si_data.pop('id', None)
-                si_data['company_id'] = target_company_id
-                db.add(StockItem(**si_data))
-        db.flush()
-
-        # 5. Import Vouchers & Entries
-        for v_data in data.get('vouchers', []):
-            v_data.pop('_sa_instance_state', None)
-            # Use tally_guid or date+voucher_number as key
-            existing = None
-            if v_data.get('tally_guid'):
-                existing = db.query(Voucher).filter(Voucher.tally_guid == v_data['tally_guid'], Voucher.company_id == target_company_id).first()
-            
+        # 2. Import UOMs
+        for u in data.get('uoms', []):
+            old_id = u.get('id')
+            existing = db.query(UnitOfMeasure).filter(UnitOfMeasure.symbol == u['symbol'], UnitOfMeasure.company_id == target_company_id).first()
             if not existing:
-                v_data.pop('id', None)
-                v_data['company_id'] = target_company_id
-                new_vch = Voucher(**v_data)
-                db.add(new_vch)
-        db.flush()
+                new_u = UnitOfMeasure(**{k:v for k,v in u.items() if k not in ['id', '_sa_instance_state']})
+                new_u.company_id = target_company_id
+                db.add(new_u)
+                db.flush()
+                uom_map[old_id] = new_u.id
+            else:
+                uom_map[old_id] = existing.id
+
+        # 3. Import Godowns
+        for g in data.get('godowns', []):
+            old_id = g.get('id')
+            existing = db.query(Godown).filter(Godown.name == g['name'], Godown.company_id == target_company_id).first()
+            if not existing:
+                new_g = Godown(**{k:v for k,v in g.items() if k not in ['id', '_sa_instance_state']})
+                new_g.company_id = target_company_id
+                db.add(new_g)
+                db.flush()
+                godown_map[old_id] = new_g.id
+            else:
+                godown_map[old_id] = existing.id
+
+        # 4. Import Groups (Hierarchical mapping)
+        groups_raw = data.get('groups', [])
+        # Pass 1: Create all groups with parent_id=None
+        for g in groups_raw:
+            old_id = g.get('id')
+            existing = db.query(TallyGroup).filter(TallyGroup.name == g['name'], TallyGroup.company_id == target_company_id).first()
+            if not existing:
+                new_g = TallyGroup(
+                    name=g['name'],
+                    company_id=target_company_id,
+                    tally_guid=g.get('tally_guid'),
+                    alterid=g.get('alterid')
+                )
+                db.add(new_g)
+                db.flush()
+                group_map[old_id] = new_g.id
+            else:
+                group_map[old_id] = existing.id
         
+        # Pass 2: Update parent_ids
+        for g in groups_raw:
+            old_id = g.get('id')
+            old_parent_id = g.get('parent_id')
+            if old_parent_id and old_parent_id in group_map:
+                db.query(TallyGroup).filter(TallyGroup.id == group_map[old_id]).update({"parent_id": group_map[old_parent_id]})
+        db.flush()
+
+        # 5. Import Ledgers
+        for l in data.get('ledgers', []):
+            old_id = l.get('id')
+            existing = db.query(Ledger).filter(Ledger.name == l['name'], Ledger.company_id == target_company_id).first()
+            if not existing:
+                l_copy = {k:v for k,v in l.items() if k not in ['id', '_sa_instance_state']}
+                l_copy['company_id'] = target_company_id
+                if l.get('group_id') in group_map:
+                    l_copy['group_id'] = group_map[l['group_id']]
+                new_l = Ledger(**l_copy)
+                db.add(new_l)
+                db.flush()
+                ledger_map[old_id] = new_l.id
+            else:
+                ledger_map[old_id] = existing.id
+
+        # 6. Import Stock Items
+        for si in data.get('stock_items', []):
+            old_id = si.get('id')
+            existing = db.query(StockItem).filter(StockItem.name == si['name'], StockItem.company_id == target_company_id).first()
+            if not existing:
+                si_copy = {k:v for k,v in si.items() if k not in ['id', '_sa_instance_state']}
+                si_copy['company_id'] = target_company_id
+                if si.get('uom_id') in uom_map:
+                    si_copy['uom_id'] = uom_map[si['uom_id']]
+                new_si = StockItem(**si_copy)
+                db.add(new_si)
+                db.flush()
+                stock_item_map[old_id] = new_si.id
+            else:
+                stock_item_map[old_id] = existing.id
+
+        # 7. Import Vouchers
+        for v in data.get('vouchers', []):
+            old_id = v.get('id')
+            v_copy = {k:v for k,v in v.items() if k not in ['id', '_sa_instance_state']}
+            v_copy['company_id'] = target_company_id
+            # Note: We assume VoucherTypes are correctly synced/existent or handled by migration.
+            # If they are in the JSON, we should map them too, but they are often system-level or synced from Tally.
+            new_v = Voucher(**v_copy)
+            db.add(new_v)
+            db.flush()
+            voucher_map[old_id] = new_v.id
+
+        # 8. Import Voucher Entries
+        for ve in data.get('voucher_entries', []):
+            ve_copy = {k:v for k,v in ve.items() if k not in ['id', '_sa_instance_state']}
+            if ve.get('voucher_id') in voucher_map:
+                ve_copy['voucher_id'] = voucher_map[ve['voucher_id']]
+                if ve.get('ledger_id') in ledger_map:
+                    ve_copy['ledger_id'] = ledger_map[ve['ledger_id']]
+                db.add(VoucherEntry(**ve_copy))
+
+        # 9. Import Inventory Entries
+        for ie in data.get('inventory_entries', []):
+            ie_copy = {k:v for k,v in ie.items() if k not in ['id', '_sa_instance_state']}
+            if ie.get('voucher_id') in voucher_map:
+                ie_copy['voucher_id'] = voucher_map[ie['voucher_id']]
+                if ie.get('stock_item_id') in stock_item_map:
+                    ie_copy['stock_item_id'] = stock_item_map[ie['stock_item_id']]
+                if ie.get('godown_id') in godown_map:
+                    ie_copy['godown_id'] = godown_map[ie['godown_id']]
+                db.add(InventoryEntry(**ie_copy))
+
         db.commit()
         return {"message": "Data restored successfully.", "company_id": target_company_id}
     except Exception as e:
         db.rollback()
+        print(f"Restore failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/admin/reset-db")
