@@ -267,7 +267,7 @@ def sync_ledgers_to_db(db, company_id: int, xml_content=None):
             db_ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == company_id).first()
             
         if not db_ledger:
-            db_ledger = Ledger(name=name, company_id=company_id)
+            db_ledger = Ledger(name=name, company_id=company_id, group_id=group.id)
             db.add(db_ledger)
             db.flush()
         

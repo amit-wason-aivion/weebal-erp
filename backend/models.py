@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Date, Boolean
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Date, Boolean, UniqueConstraint
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -15,8 +15,12 @@ class TallyGroup(Base):
     company_id = Column(Integer, ForeignKey('companies.id'), nullable=False)
     
     # Tally Sync Columns
-    tally_guid = Column(String, unique=True, index=True)
+    tally_guid = Column(String, unique=False, index=True)
     alterid = Column(Integer, index=True)
+    
+    __table_args__ = (
+        UniqueConstraint('company_id', 'tally_guid', name='_company_tally_group_guid_uc'),
+    )
     
     # Relationships
     parent = relationship("TallyGroup", remote_side=[id], backref="children")
@@ -74,8 +78,12 @@ class Ledger(Base):
     shift_type = Column(String, nullable=True) # General, Night, Rotating
     
     # Tally Sync Columns
-    tally_guid = Column(String, unique=True, index=True)
+    tally_guid = Column(String, unique=False, index=True)
     alterid = Column(Integer, index=True)
+    
+    __table_args__ = (
+        UniqueConstraint('company_id', 'tally_guid', name='_company_tally_ledger_guid_uc'),
+    )
     
     # Relationships
     group = relationship("TallyGroup", back_populates="ledgers")
@@ -110,8 +118,12 @@ class VoucherType(Base):
     is_inventory_voucher = Column(Boolean, default=False)
     
     # Tally Sync Columns
-    tally_guid = Column(String, unique=True, index=True)
+    tally_guid = Column(String, unique=False, index=True)
     alterid = Column(Integer, index=True)
+
+    __table_args__ = (
+        UniqueConstraint('company_id', 'tally_guid', name='_company_tally_vtype_guid_uc'),
+    )
 
 class Voucher(Base):
     """
@@ -127,9 +139,13 @@ class Voucher(Base):
     narration = Column(String, nullable=True)
     
     # Tally Sync Columns
-    tally_guid = Column(String, unique=True, index=True)
+    tally_guid = Column(String, unique=False, index=True)
     alterid = Column(Integer, index=True)
     is_synced = Column(Boolean, default=False)
+    
+    __table_args__ = (
+        UniqueConstraint('company_id', 'tally_guid', name='_company_tally_voucher_guid_uc'),
+    )
     
     # Relationships
     type = relationship("VoucherType")
