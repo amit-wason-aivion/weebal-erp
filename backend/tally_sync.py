@@ -256,12 +256,22 @@ def sync_ledgers_to_db(db, company_id: int, xml_content=None):
                 if not phone: phone = mailing_details.findtext('PHONENUMBER') or ""
                 if not email: email = mailing_details.findtext('EMAIL') or ""
 
-        # 4. UPSERT Ledger
-        db_ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == company_id).first()
+    # 4. UPSERT Ledger
+        # Try finding by GUID first (it's the most reliable unique key from Tally)
+        db_ledger = None
+        if guid:
+            db_ledger = db.query(Ledger).filter(Ledger.tally_guid == guid, Ledger.company_id == company_id).first()
+        
+        if not db_ledger:
+            # Fallback to Name + Company
+            db_ledger = db.query(Ledger).filter(Ledger.name == name, Ledger.company_id == company_id).first()
+            
         if not db_ledger:
             db_ledger = Ledger(name=name, company_id=company_id)
             db.add(db_ledger)
+            db.flush()
         
+        db_ledger.name = name
         db_ledger.group_id = group.id
         db_ledger.tally_guid = guid
         db_ledger.alterid = int(alterid) if alterid else 0
@@ -286,7 +296,7 @@ def sync_vouchers_to_db(db, company_id: int, xml_content=None):
     High-level function to sync vouchers from Tally to PostgreSQL.
     Accepts optional xml_content for file-based uploads.
     """
-    from .models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry
+    from .models import Voucher, VoucherEntry, Ledger, VoucherType, InventoryEntry, TallyGroup, StockItem, UnitOfMeasure
     from sqlalchemy.orm import Session
     from decimal import Decimal
     from datetime import datetime
@@ -399,7 +409,6 @@ def sync_vouchers_to_db(db, company_id: int, xml_content=None):
                 added_ledger_entries.append((ve, ledger))
 
         # Process Inventory Entries
-        from .models import StockItem, UnitOfMeasure, InventoryEntry
         for inv_item in inventory_lists:
             item_name = inv_item.findtext('STOCKITEMNAME')
             amount_str = inv_item.findtext('AMOUNT')
