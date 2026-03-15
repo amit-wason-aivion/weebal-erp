@@ -457,35 +457,39 @@ def sync_vouchers_to_db(db, company_id: int, xml_content=None):
                 ))
         
         # Virtual Inventory for Service Invoices (Sales/Purchase with no items)
-        if not inventory_lists and vch_type_name and vch_type_name.upper() in ['SALES', 'PURCHASE']:
-            for ve, ldr in added_ledger_entries:
-                # Identify income/expense ledger (Credit for Sales, Debit for Purchase)
-                is_revenue = (vch_type_name.upper() == 'SALES' and not ve.is_debit)
-                is_expense = (vch_type_name.upper() == 'PURCHASE' and ve.is_debit)
-                
-                if is_revenue or is_expense:
-                    # Double check if it belongs to Sales/Purchase accounts to avoid taxes
-                    if ldr.group and ldr.group.name.lower() in ['sales accounts', 'purchase accounts']:
-                        # Create/Find Service item
-                        stock_item = db.query(StockItem).filter(StockItem.name == ldr.name, StockItem.company_id == company_id).first()
-                        if not stock_item:
-                            uom = db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == company_id).first()
-                            if not uom:
-                                uom = UnitOfMeasure(symbol="Nos", formal_name="Numbers", company_id=company_id)
-                                db.add(uom)
+        if not inventory_lists and vch_type_name:
+            vtype_upper = vch_type_name.upper()
+            if 'SALES' in vtype_upper or 'PURCHASE' in vtype_upper:
+                # Find the primary revenue/expense entry to create a virtual item
+                for ve, ldr in added_ledger_entries:
+                    is_revenue = ('SALES' in vtype_upper and not ve.is_debit)
+                    is_expense = ('PURCHASE' in vtype_upper and ve.is_debit)
+                    
+                    if is_revenue or is_expense:
+                        # Double check if it belongs to Sales/Purchase groups
+                        if ldr.group and ldr.group.name.lower() in ['sales accounts', 'purchase accounts']:
+                            # Create/Find Service item
+                            item_name = f"Service: {ldr.name}"
+                            stock_item = db.query(StockItem).filter(StockItem.name == item_name, StockItem.company_id == company_id).first()
+                            if not stock_item:
+                                uom = db.query(UnitOfMeasure).filter(UnitOfMeasure.company_id == company_id).first()
+                                if not uom:
+                                    uom = UnitOfMeasure(symbol="Nos", formal_name="Numbers", company_id=company_id)
+                                    db.add(uom)
+                                    db.flush()
+                                stock_item = StockItem(name=item_name, company_id=company_id, uom_id=uom.id)
+                                db.add(stock_item)
                                 db.flush()
-                            stock_item = StockItem(name=ldr.name, company_id=company_id, uom_id=uom.id)
-                            db.add(stock_item)
-                            db.flush()
-                        
-                        db.add(InventoryEntry(
-                            voucher_id=existing.id,
-                            stock_item_id=stock_item.id,
-                            quantity=Decimal('1'),
-                            rate=abs(ve.amount),
-                            amount=abs(ve.amount),
-                            is_inward=is_expense
-                        ))
+                            
+                            db.add(InventoryEntry(
+                                voucher_id=existing.id,
+                                stock_item_id=stock_item.id,
+                                quantity=Decimal('1'),
+                                rate=abs(ve.amount),
+                                amount=abs(ve.amount),
+                                is_inward=is_expense
+                            ))
+                            break # Only one virtual item per invoice is typical
         
         count += 1
         
