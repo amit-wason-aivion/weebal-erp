@@ -27,17 +27,23 @@ def migrate():
         try:
             conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS salt_composition VARCHAR"))
             conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS rack_number VARCHAR"))
+            conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS main_unit_name VARCHAR"))
+            conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS sub_unit_name VARCHAR"))
             conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS conversion_factor INTEGER DEFAULT 1"))
+            conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS min_stock_level INTEGER DEFAULT 0"))
+            conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS is_narcotic BOOLEAN DEFAULT FALSE"))
+            conn.execute(text("ALTER TABLE stock_items ADD COLUMN IF NOT EXISTS is_h1 BOOLEAN DEFAULT FALSE"))
             print("Verified: stock_items pharma fields")
         except Exception as e:
             print(f"Skipping stock_items fields: {e}")
 
-        # 3. Add batch_id to inventory_entries
+        # 3. Add batch_id/godown_id to inventory_entries
         try:
             conn.execute(text("ALTER TABLE inventory_entries ADD COLUMN IF NOT EXISTS batch_id INTEGER REFERENCES stock_batches(id)"))
-            print("Verified: inventory_entries.batch_id")
+            conn.execute(text("ALTER TABLE inventory_entries ADD COLUMN IF NOT EXISTS godown_id INTEGER REFERENCES godowns(id)"))
+            print("Verified: inventory_entries pharma/godown fields")
         except Exception as e:
-            print(f"Skipping inventory_entries.batch_id: {e}")
+            print(f"Skipping inventory_entries fields: {e}")
 
         # 4. Add Ledger fields
         try:

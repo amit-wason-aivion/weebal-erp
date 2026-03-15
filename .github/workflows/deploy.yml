@@ -96,6 +96,6 @@ jobs:
             cd ..
             
             # 5. Restart the CloudPanel App
-            clpctl python:restart --domainName=accounts-api.weebalinfotech.com
+            sudo systemctl restart accounts-api
             echo "Deployment completed successfully!"
 
